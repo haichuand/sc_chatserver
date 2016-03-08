@@ -1,16 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package SuperCalyChatServer;
 
 public class ProcessorFactory {
-
-    private static final String PACKAGE = "monoserver";
-    private static final String ACTION_REGISTER = PACKAGE + ".REGISTER";
-    private static final String ACTION_ECHO = PACKAGE + ".ECHO";
-    private static final String ACTION_MESSAGE = PACKAGE + ".MESSAGE";
+    
+    private static final String ACTION_REGISTER = "REGISTER";
+    private static final String ACTION_ECHO = "ECHO";
+    private static final String ACTION_MESSAGE = "MESSAGE";
 
     public static PayloadProcessor getProcessor(String action) {
         if (action == null) {

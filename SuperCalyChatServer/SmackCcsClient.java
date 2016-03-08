@@ -364,12 +364,12 @@ public class SmackCcsClient {
         connection.addConnectionListener(new ConnectionListener() {
             @Override
             public void authenticated(XMPPConnection connection) {
-                logger.info(connection.toString()+"hahah");
+                logger.info(connection.toString());
             }
             
             @Override
             public void connected(XMPPConnection connection) {
-                logger.log(Level.INFO, "Connection connected. ++++++");
+                logger.log(Level.INFO, "Connection connected.");
             }
             
             @Override
@@ -433,8 +433,6 @@ public class SmackCcsClient {
 
         connection.login(mProjectId + "@gcm.googleapis.com", mApiKey);
         logger.log(Level.INFO, "logged in: " + mProjectId);
-        
-        System.out.println ("}}}}}}}"+ connection.isConnected());
     }
 
     private void handleMessage(Map<String, Object> jsonMap) {
@@ -498,8 +496,7 @@ public class SmackCcsClient {
         Boolean delayWhileIdle = true;
         ccsClient.send(createJsonMessage(toRegId, messageId, payload, collapseKey,
                timeToLive, delayWhileIdle));
-        //ccsClient.send(createJsonMessage(toRegId,"sfsdsdfsdf", payload, collapseKey,
-            //    timeToLive, delayWhileIdle));
+        
         System.out.println("sent finishes.");
         //crude loop to keep connection open for receiving messages
         while(true)

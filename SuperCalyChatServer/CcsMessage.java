@@ -11,7 +11,11 @@ import java.util.Map;
  * Represents a message for CCS based massaging.
  */
 public class CcsMessage {
-
+    //fields in Payload Json
+    public static final String SENDER_ID = "sender_id";
+    public static final String CONVERSATION_ID = "conversation_id";
+    public static final String RECIPIENTS = "recipients";
+    public static final String MESSAGE = "message";
     /**
      * Recipient-ID.
      */
