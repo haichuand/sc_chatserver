@@ -489,8 +489,10 @@ public class SmackCcsClient {
         // Send a sample hello downstream message to a device.
         String messageId = ccsClient.getRandomMessageId();
         Map<String, String> payload = new HashMap<String, String>();
-        payload.put("message", "Simple sample message sent from the app server");
-        payload.put("extra", "see if anything extra would show ");
+        payload.put(CcsMessage.MESSAGE, "Simple sample message sent from the app server");
+        payload.put(CcsMessage.RECIPIENTS, "random recipients ");
+        payload.put(CcsMessage.CONVERSATION_ID, "some random conversation id");
+        payload.put(CcsMessage.SENDER_ID, "server id: 112342.......");
         String collapseKey = "sample";
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
