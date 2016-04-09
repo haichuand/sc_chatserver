@@ -19,6 +19,7 @@ import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.util.XmlStringBuilder;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.SmackException.ConnectionException;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.xmlpull.v1.XmlPullParser;
@@ -51,7 +52,7 @@ public class SmackCcsClient {
 
     public static final Logger logger = Logger.getLogger(SmackCcsClient.class.getName());
 
-    public static final String GCM_SERVER = "gcm.googleapis.com";
+    public static final String GCM_SERVER = "gcm-xmpp.googleapis.com";
     public static final int GCM_PORT = 5235;
 
     public static final String GCM_ELEMENT_NAME = "gcm";
@@ -354,7 +355,7 @@ public class SmackCcsClient {
         config.setSocketFactory(SSLSocketFactory.getDefault());
 
         // NOTE: Set to true to launch a window with information about packets sent and received
-        config.setDebuggerEnabled(mDebuggable);
+        //config.setDebuggerEnabled(mDebuggable);
 
         // -Dsmack.debugEnabled=true
 
@@ -469,13 +470,17 @@ public class SmackCcsClient {
     public static void main(String[] args) {
         final String projectId = "115711938538";
         final String password = "AIzaSyDYP8RiorJWNGwP8gSuaxoevvFQkyJH_6c";
-        final String toRegId = "faDH8E5Uzfc:APA91bH5-wo_-pKLJ3oqJtniHmOXX6mGZK_kVZqNqbKC8n5EY_X397p2nd0vRUtfkA8TeOO04RalvCLa7sZTVJSNapzD4EHQuAJh8uh_CFGXwFknsMcZMJizOQHM9HLj-qcaAY4isRYR";
+        final String toRegId = "cqGKPB-73Ps:APA91bFQEhedJ1_KGwIBWMJFYAMMZAVkwIw8iT5FoJiuXaqij1XWglYTKtGqhhntk1snoukzLMvJQL9-s7GZP4w_j05u55IpyYgSaNnXZe6bSKBlt1iQDg_OkMbCyA-Z3r8jvEqaDYDm";
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
 
         try {
             ccsClient.connect();
         } 
+        catch (ConnectionException e) {
+            logger.log(Level.SEVERE,e.getFailedAddresses().toString());
+            logger.log(Level.SEVERE,e.getFailedAddresses().get(0).getException().getMessage());
+        }
         catch (XMPPException e) {
             e.printStackTrace();
         }
@@ -487,19 +492,19 @@ public class SmackCcsClient {
         }
 
         // Send a sample hello downstream message to a device.
-        String messageId = ccsClient.getRandomMessageId();
-        Map<String, String> payload = new HashMap<String, String>();
-        payload.put(CcsMessage.MESSAGE, "Simple sample message sent from the app server");
-        payload.put(CcsMessage.RECIPIENTS, "random recipients ");
-        payload.put(CcsMessage.CONVERSATION_ID, "some random conversation id");
-        payload.put(CcsMessage.SENDER_ID, "server id: 112342.......");
-        String collapseKey = "sample";
-        Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
-        ccsClient.send(createJsonMessage(toRegId, messageId, payload, collapseKey,
-               timeToLive, delayWhileIdle));
-        
-        System.out.println("sent finishes.");
+//        String messageId = ccsClient.getRandomMessageId();
+//        Map<String, String> payload = new HashMap<String, String>();
+//        payload.put(CcsMessage.MESSAGE, "Simple sample message sent from the app server");
+//        payload.put(CcsMessage.RECIPIENTS, "random recipients ");
+//        payload.put(CcsMessage.CONVERSATION_ID, "some random conversation id");
+//        payload.put(CcsMessage.SENDER_ID, "server id: 112342.......");
+//        String collapseKey = "sample";
+//        Long timeToLive = 10000L;
+//        Boolean delayWhileIdle = true;
+//        ccsClient.send(createJsonMessage(toRegId, messageId, payload, collapseKey,
+//               timeToLive, delayWhileIdle));
+//        
+//        System.out.println("sent finishes.");
         //crude loop to keep connection open for receiving messages
         while(true)
         {;}
