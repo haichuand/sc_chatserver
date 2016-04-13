@@ -59,6 +59,10 @@ public class PseudoDao {
     public List<String> getAllRegistrationIds() {
         return Collections.unmodifiableList(mRegisteredUsers);
     }
+
+    public List<String> getTokensForConversation(String conversationId) {
+        return getAllRegistrationIds();
+    }
     
     public List<String> getAllRegistrationIdsForAccount(String account) {
         List<String> regIds = mUserMap.get(account);

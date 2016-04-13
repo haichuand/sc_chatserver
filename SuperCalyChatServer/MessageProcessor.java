@@ -28,10 +28,14 @@ public class MessageProcessor implements PayloadProcessor{
         String message = "";
         String senderId = "";
         
-        if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS))
-            recipients = Arrays.asList(msg.getPayload().get(CcsMessage.RECIPIENTS).split(","));
+//        if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS))
+//            recipients = Arrays.asList(msg.getPayload().get(CcsMessage.RECIPIENTS).split(","));
+
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
+
+        recipients = dao.getTokensForConversation(conversationId);
+
         if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
             message = msg.getPayload().get(CcsMessage.MESSAGE);
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
