@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package SuperCalyChatServer;
+package SuperCalyChatServer.DAO;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * This class acts as a DAO replacement. There is no
@@ -22,19 +33,21 @@ import java.util.Set;
  * You have to take care of persisting messages as well as
  * recipients for proper apps!
  */
-public class PseudoDao {
+public class SuperDao {
     
-    private final static PseudoDao instance = new PseudoDao();
+    private final static SuperDao instance = new SuperDao();
     private final static Random sRandom = new Random();
+    private final String host = "http://localhost:8080/SuperCaly/rest";
     private final Set<Integer> mMessageIds = new HashSet<Integer>();
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();
     private final Map<String, String> mNotificationKeyMap = new HashMap<String, String>();
+    private final ConcurrentHashMap<Integer, String> userGcmCache = new ConcurrentHashMap<>();
     
-    private PseudoDao() {        
+    private SuperDao() {        
     }
     
-    public static PseudoDao getInstance() {
+    public static SuperDao getInstance() {
         return instance;
     }
     
@@ -90,5 +103,58 @@ public class PseudoDao {
             nextRandom = sRandom.nextInt();
         }
         return Integer.toString(nextRandom);
+    }
+    
+    public String getUserGcmId(int uId) {
+        return this.userGcmCache.get(uId);
+    }
+    
+    public void updateUserGcmId(int uId, String newGcmId) {
+        this.userGcmCache.replace(uId, newGcmId);
+    }
+    
+    public void populateUserGcmCache() throws IOException, ParseException{
+        String url = host + "/user/getAllUserIdAndGcmId";
+        String gcmIdJson;
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        con.setRequestMethod("GET");
+        int responseCode = con.getResponseCode();
+
+        System.out.println("\nSending 'GET' request to URL : " + url);
+        System.out.println("Response Code : " + responseCode);
+        
+        BufferedReader in;
+        in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        
+        in.close();
+        
+        gcmIdJson = response.toString();
+        System.out.println("Response content : " + gcmIdJson);
+        gcmIdsJsonParser(gcmIdJson, this.userGcmCache);
+    }
+    
+    private void gcmIdsJsonParser (String gcmJson, ConcurrentHashMap<Integer, String> map) throws ParseException{
+        JSONParser parser = new JSONParser();
+        int uId;
+        String gcmId;
+        JSONObject obj = (JSONObject)parser.parse(gcmJson);
+        if(obj.containsKey("usersGcmId")) {
+            JSONArray array = (JSONArray)obj.get(obj);
+            for (int i = 0; i < array.size(); i++) {
+                JSONObject row = (JSONObject)array.get(i);
+                uId = (Integer)row.get("uId");
+                gcmId = (String)row.get("gcmId");
+                map.put(uId, gcmId);
+            }
+        }
     }
 }

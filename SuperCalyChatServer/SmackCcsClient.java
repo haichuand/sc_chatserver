@@ -1,6 +1,9 @@
 
 package SuperCalyChatServer;
 
+import SuperCalyChatServer.processor.PayloadProcessor;
+import SuperCalyChatServer.processor.ProcessorFactory;
+import SuperCalyChatServer.DAO.SuperDao;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ConnectionListener;
@@ -465,48 +468,5 @@ public class SmackCcsClient {
             logger.log(Level.WARNING, "Unrecognized message type (%s)",
                     messageType.toString());
         }
-    }
-
-    public static void main(String[] args) {
-        final String projectId = "115711938538";
-        final String password = "AIzaSyDYP8RiorJWNGwP8gSuaxoevvFQkyJH_6c";
-        final String toRegId = "cqGKPB-73Ps:APA91bFQEhedJ1_KGwIBWMJFYAMMZAVkwIw8iT5FoJiuXaqij1XWglYTKtGqhhntk1snoukzLMvJQL9-s7GZP4w_j05u55IpyYgSaNnXZe6bSKBlt1iQDg_OkMbCyA-Z3r8jvEqaDYDm";
-        //connect();
-        SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
-
-        try {
-            ccsClient.connect();
-        } 
-        catch (ConnectionException e) {
-            logger.log(Level.SEVERE,e.getFailedAddresses().toString());
-            logger.log(Level.SEVERE,e.getFailedAddresses().get(0).getException().getMessage());
-        }
-        catch (XMPPException e) {
-            e.printStackTrace();
-        }
-        catch (SmackException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Send a sample hello downstream message to a device.
-//        String messageId = ccsClient.getRandomMessageId();
-//        Map<String, String> payload = new HashMap<String, String>();
-//        payload.put(CcsMessage.MESSAGE, "Simple sample message sent from the app server");
-//        payload.put(CcsMessage.RECIPIENTS, "random recipients ");
-//        payload.put(CcsMessage.CONVERSATION_ID, "some random conversation id");
-//        payload.put(CcsMessage.SENDER_ID, "server id: 112342.......");
-//        String collapseKey = "sample";
-//        Long timeToLive = 10000L;
-//        Boolean delayWhileIdle = true;
-//        ccsClient.send(createJsonMessage(toRegId, messageId, payload, collapseKey,
-//               timeToLive, delayWhileIdle));
-//        
-//        System.out.println("sent finishes.");
-        //crude loop to keep connection open for receiving messages
-        while(true)
-        {;}
     }
 }

@@ -1,5 +1,7 @@
 
-package SuperCalyChatServer;
+package SuperCalyChatServer.processor;
+
+import SuperCalyChatServer.CcsMessage;
 
 
 public interface PayloadProcessor {

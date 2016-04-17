@@ -3,19 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package SuperCalyChatServer;
+package SuperCalyChatServer.processor;
 
+import SuperCalyChatServer.CcsMessage;
+import SuperCalyChatServer.DAO.SuperDao;
+import SuperCalyChatServer.SmackCcsClient;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.simple.parser.ParseException;
 
 public class MessageProcessor implements PayloadProcessor{
 
     @Override
     public void handleMessage(CcsMessage msg) {
-        PseudoDao dao = PseudoDao.getInstance();
+        SuperDao dao = SuperDao.getInstance();
         SmackCcsClient client = SmackCcsClient.getInstance();
         
         List<String> recipients = new ArrayList<>();
@@ -27,19 +32,17 @@ public class MessageProcessor implements PayloadProcessor{
         String conversationId = "";
         String message = "";
         String senderId = "";
-        
-//        if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS))
-//            recipients = Arrays.asList(msg.getPayload().get(CcsMessage.RECIPIENTS).split(","));
 
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
-
-        recipients = dao.getTokensForConversation(conversationId);
-
-        if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
-            message = msg.getPayload().get(CcsMessage.MESSAGE);
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
             senderId = msg.getPayload().get(CcsMessage.SENDER_ID);
+       
+        recipients = dao.getTokensForConversation(conversationId);
+        
+        
+        if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
+            message = msg.getPayload().get(CcsMessage.MESSAGE);
         
         //create new payload
         Map<String, String> newPayload = new HashMap<String, String>();

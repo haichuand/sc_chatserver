@@ -3,14 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package SuperCalyChatServer;
+package SuperCalyChatServer.processor;
+
+import SuperCalyChatServer.CcsMessage;
+import SuperCalyChatServer.DAO.SuperDao;
 
 public class RegisterProcessor implements PayloadProcessor{
 
     @Override
     public void handleMessage(CcsMessage msg) {
         String accountName = msg.getPayload().get("account");
-        PseudoDao.getInstance().addRegistration(msg.getFrom(), accountName);
+        SuperDao.getInstance().addRegistration(msg.getFrom(), accountName);
     }
 
 }

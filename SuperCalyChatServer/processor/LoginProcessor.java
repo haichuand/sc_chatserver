@@ -1,5 +1,9 @@
-package SuperCalyChatServer;
+package SuperCalyChatServer.processor;
 
+import SuperCalyChatServer.CcsMessage;
+import SuperCalyChatServer.processor.ProcessorFactory;
+import SuperCalyChatServer.DAO.SuperDao;
+import SuperCalyChatServer.SmackCcsClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +21,7 @@ public class LoginProcessor implements PayloadProcessor {
 
     @Override
     public void handleMessage(CcsMessage msg) {
-        PseudoDao dao = PseudoDao.getInstance();
+        SuperDao dao = SuperDao.getInstance();
         SmackCcsClient client = SmackCcsClient.getInstance();
 
         List<String> recipients = new ArrayList<>();
