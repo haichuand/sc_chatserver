@@ -105,6 +105,10 @@ public class SuperDao {
         return Integer.toString(nextRandom);
     }
     
+    public void addNewUser(int uId, String gcmId) {
+        this.userGcmCache.put(uId, gcmId);
+    }
+    
     public String getUserGcmId(int uId) {
         return this.userGcmCache.get(uId);
     }

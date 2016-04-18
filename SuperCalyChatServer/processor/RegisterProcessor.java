@@ -21,9 +21,15 @@ public class RegisterProcessor implements PayloadProcessor{
         String accountName =(String)msg.getPayload().get("account");
         SuperDao.getInstance().addRegistration(msg.getFrom(), accountName);
         
-        int userId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
-        String gcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
-        SuperDao.getInstance().updateUserGcmId(userId, gcmId);
+        int userId = -1;
+        String gcmId = "";
+        
+        if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
+            userId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
+        if(msg.getPayload().containsKey(CcsMessage.GCM_ID))
+            gcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
+        
+        SuperDao.getInstance().addNewUser(userId, gcmId);
     }
 
 }

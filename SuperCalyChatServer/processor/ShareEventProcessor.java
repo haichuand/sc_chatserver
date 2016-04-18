@@ -46,7 +46,7 @@ public class ShareEventProcessor implements PayloadProcessor{
         String conversationId = "";
         
         if(msg.getPayload().containsKey(CcsMessage.CREATOR_ID))
-            creatorId = (int)msg.getPayload().get(CcsMessage.CREATOR_ID);
+            creatorId = (Integer)msg.getPayload().get(CcsMessage.CREATOR_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);

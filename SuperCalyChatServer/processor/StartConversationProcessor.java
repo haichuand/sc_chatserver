@@ -21,12 +21,12 @@ import java.util.Map;
 
 /**
  * Payload of StartConversation request contains:
- * creator_id, conversation_id, recipients, action
+ * creatorId, conversationId, recipients, action
 **/
 
 /**
  * Payload of StartConversation send to recipients contains:
- * creator_id, conversation_id, action
+ * creatorId, conversationId, action
 **/
 
 public class StartConversationProcessor implements PayloadProcessor{
@@ -45,7 +45,7 @@ public class StartConversationProcessor implements PayloadProcessor{
         String conversationId = "";
         
         if(msg.getPayload().containsKey(CcsMessage.CREATOR_ID))
-            creatorId = (int)msg.getPayload().get(CcsMessage.CREATOR_ID);
+            creatorId = (Integer)msg.getPayload().get(CcsMessage.CREATOR_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);

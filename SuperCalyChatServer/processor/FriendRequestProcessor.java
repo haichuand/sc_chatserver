@@ -40,7 +40,7 @@ public class FriendRequestProcessor implements PayloadProcessor{
         String action = "";
         
         if(msg.getPayload().containsKey(CcsMessage.TARGET_USER_ID))
-            targetUserId = (int)msg.getPayload().get(CcsMessage.TARGET_USER_ID);
+            targetUserId = (Integer)msg.getPayload().get(CcsMessage.TARGET_USER_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
             senderId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
