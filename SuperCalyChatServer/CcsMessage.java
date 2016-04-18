@@ -12,10 +12,22 @@ import java.util.Map;
  */
 public class CcsMessage {
     //fields in Payload Json
-    public static final String SENDER_ID = "sender_id";
-    public static final String CONVERSATION_ID = "conversation_id";
+    public static final String SENDER_ID = "senderId";
+    public static final String CONVERSATION_ID = "conversationId";
+    public static final String EVENT_ID = "eventId";
     public static final String RECIPIENTS = "recipients";
+    public static final String ACTION = "action";
     public static final String MESSAGE = "message";
+    public static final String CREATOR_ID = "creatorId";
+    public static final String START_TIME = "startTime";
+    public static final String END_TIME = "endTime";
+    public static final String CREATE_TIME = "createTime";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String LOCATION = "location";
+    public static final String TITLE = "title";
+    public static final String GCM_ID = "gcmId";
+    public static final String TARGET_USER_ID = "targetUserId";
+    
     /**
      * Recipient-ID.
      */
@@ -31,9 +43,9 @@ public class CcsMessage {
     /**
      * Payload data. A String in Json format.
      */
-    private Map<String, String> mPayload;
+    private Map<String, Object> mPayload;
 
-    public CcsMessage(String from, String category, String messageId, Map<String, String> payload) {
+    public CcsMessage(String from, String category, String messageId, Map<String, Object> payload) {
         mFrom = from;
         mCategory = category;
         mMessageId = messageId;
@@ -52,7 +64,7 @@ public class CcsMessage {
         return mMessageId;
     }
 
-    public Map<String, String> getPayload() {
+    public Map<String, Object> getPayload() {
         return mPayload;
     }
 }

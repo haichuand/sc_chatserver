@@ -34,18 +34,18 @@ public class MessageProcessor implements PayloadProcessor{
         String senderId = "";
 
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
-            conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
+            conversationId = (String)msg.getPayload().get(CcsMessage.CONVERSATION_ID);
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
-            senderId = msg.getPayload().get(CcsMessage.SENDER_ID);
+            senderId = (String)msg.getPayload().get(CcsMessage.SENDER_ID);
        
         recipients = dao.getTokensForConversation(conversationId);
         
         
         if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
-            message = msg.getPayload().get(CcsMessage.MESSAGE);
+            message = (String)msg.getPayload().get(CcsMessage.MESSAGE);
         
         //create new payload
-        Map<String, String> newPayload = new HashMap<String, String>();
+        Map<String, Object> newPayload = new HashMap<>();
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
         newPayload.put(CcsMessage.SENDER_ID, senderId);
         newPayload.put(CcsMessage.MESSAGE, message); 

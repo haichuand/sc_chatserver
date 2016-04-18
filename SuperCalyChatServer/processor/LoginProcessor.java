@@ -33,8 +33,8 @@ public class LoginProcessor implements PayloadProcessor {
 
         int status = STATUS_OK;
 
-        String username = msg.getPayload().get(USERNAME);
-        String password = msg.getPayload().get(PASSWORD);
+        String username = (String)msg.getPayload().get(USERNAME);
+        String password = (String)msg.getPayload().get(PASSWORD);
 
         if (!password.equals(password)) {
             status = STATUS_FAILED;
@@ -44,7 +44,7 @@ public class LoginProcessor implements PayloadProcessor {
             dao.addRegistration(msg.getFrom(), username);
         }
 
-        Map<String, String> payload = new HashMap<>();
+        Map<String, Object> payload = new HashMap<>();
         payload.put(ACTION, ProcessorFactory.ACTION_LOGIN);
         payload.put(STATUS, String.valueOf(status));
         payload.put(USERNAME, username);

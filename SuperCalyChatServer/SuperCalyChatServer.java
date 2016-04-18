@@ -44,6 +44,7 @@ public class SuperCalyChatServer {
         }
         
         try {
+            
             SuperDao.getInstance().populateUserGcmCache();
             
         } catch (IOException e) {

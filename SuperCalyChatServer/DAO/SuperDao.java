@@ -148,10 +148,11 @@ public class SuperDao {
         String gcmId;
         JSONObject obj = (JSONObject)parser.parse(gcmJson);
         if(obj.containsKey("usersGcmId")) {
-            JSONArray array = (JSONArray)obj.get(obj);
+            JSONArray array = (JSONArray)obj.get("usersGcmId");
             for (int i = 0; i < array.size(); i++) {
                 JSONObject row = (JSONObject)array.get(i);
-                uId = (Integer)row.get("uId");
+                Long longUId =(Long)row.get("uId");
+                uId = Integer.valueOf(longUId.intValue());
                 gcmId = (String)row.get("gcmId");
                 map.put(uId, gcmId);
             }

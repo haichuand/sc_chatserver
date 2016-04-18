@@ -195,7 +195,7 @@ public class SmackCcsClient {
      * Sends a message to multiple recipients. Kind of like the old
      * HTTP message with the list of regIds in the "registration_ids" field.
      */
-    public void sendBroadcast(Map<String, String> payload, String collapseKey,
+    public void sendBroadcast(Map<String, Object> payload, String collapseKey,
             long timeToLive, Boolean delayWhileIdle, List<String> recipients) {
         Map map = createAttributeMap(null, null, payload, collapseKey,
                     timeToLive, delayWhileIdle);
@@ -214,7 +214,7 @@ public class SmackCcsClient {
      */
     public void handleIncomingDataMessage(CcsMessage msg) {
         if (msg.getPayload().get("action") != null) {
-            PayloadProcessor processor = ProcessorFactory.getProcessor(msg.getPayload().get("action"));
+            PayloadProcessor processor = ProcessorFactory.getProcessor((String)msg.getPayload().get("action"));
             processor.handleMessage(msg);
         }   
     }
@@ -233,7 +233,7 @@ public class SmackCcsClient {
         String messageId = jsonObject.get("message_id").toString();
         
         @SuppressWarnings("unchecked")
-        Map<String, String> payload = (Map<String, String>) jsonObject.get("data");
+        Map<String, Object> payload = (Map<String, Object>) jsonObject.get("data");
 
         CcsMessage msg = new CcsMessage(from, category, messageId, payload);
 
@@ -278,7 +278,7 @@ public class SmackCcsClient {
      * @param delayWhileIdle GCM delay_while_idle parameter (Optional).
      * @return JSON encoded GCM message.
      */
-    public static String createJsonMessage(String to, String messageId, Map<String, String> payload,
+    public static String createJsonMessage(String to, String messageId, Map<String, Object> payload,
             String collapseKey, Long timeToLive, Boolean delayWhileIdle) {
         return createJsonMessage(createAttributeMap(to, messageId, payload,
                 collapseKey, timeToLive, delayWhileIdle));
@@ -288,7 +288,7 @@ public class SmackCcsClient {
         return JSONValue.toJSONString(map);
     }
 
-    public static Map createAttributeMap(String to, String messageId, Map<String, String> payload,
+    public static Map createAttributeMap(String to, String messageId, Map<String, Object> payload,
             String collapseKey, Long timeToLive, Boolean delayWhileIdle) {
         Map<String, Object> message = new HashMap<String, Object>();
         if (to != null) {
