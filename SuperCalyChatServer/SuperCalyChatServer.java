@@ -22,7 +22,7 @@ public class SuperCalyChatServer {
     public static void main(String[] args) {
         final String projectId = "115711938538";
         final String password = "AIzaSyDYP8RiorJWNGwP8gSuaxoevvFQkyJH_6c";
-        final String toRegId = "cqGKPB-73Ps:APA91bFQEhedJ1_KGwIBWMJFYAMMZAVkwIw8iT5FoJiuXaqij1XWglYTKtGqhhntk1snoukzLMvJQL9-s7GZP4w_j05u55IpyYgSaNnXZe6bSKBlt1iQDg_OkMbCyA-Z3r8jvEqaDYDm";
+       
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
 

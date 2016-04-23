@@ -45,24 +45,24 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         // new json payload content
         String conversationId = "";
         String message = "";
-        int senderId = -1;
+        String senderId = "";
         String action = "";
-
+       
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
-            conversationId =(String) msg.getPayload().get(CcsMessage.CONVERSATION_ID);
+            conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
-            senderId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
+            senderId = msg.getPayload().get(CcsMessage.SENDER_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
-            action = (String)msg.getPayload().get(CcsMessage.ACTION);
+            action = msg.getPayload().get(CcsMessage.ACTION);
         
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
                 for(String id: recipientsId) {
-                    if(!id.equals(String.valueOf(senderId))) {
-                        recipients.add(dao.getUserGcmId(Integer.valueOf(id)));
+                    if(!id.equals(senderId)) {
+                        recipients.add(dao.getUserGcmId(id));
                     }
                 }
             }
@@ -73,7 +73,7 @@ public class ConversationMessageProcessor implements PayloadProcessor{
             message = (String)msg.getPayload().get(CcsMessage.MESSAGE);
         
         //create new payload
-        Map<String, Object> newPayload = new HashMap<String, Object>();
+        Map<String, String> newPayload = new HashMap<>();
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
         newPayload.put(CcsMessage.ACTION, action);
         newPayload.put(CcsMessage.SENDER_ID, senderId);

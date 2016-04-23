@@ -21,14 +21,14 @@ import SuperCalyChatServer.DAO.SuperDao;
 public class UpdateGcmIdProcessor implements PayloadProcessor{
     @Override
     public void handleMessage(CcsMessage msg) { 
-        int userId = -1;
-        String gcmId = "";
+        String userId = "";
+        String newGcmId = "";
         
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
-            userId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
+            userId = msg.getPayload().get(CcsMessage.SENDER_ID);
         if(msg.getPayload().containsKey(CcsMessage.GCM_ID))
-            gcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
+            newGcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
         
-        SuperDao.getInstance().updateUserGcmId(userId, gcmId);
+        SuperDao.getInstance().updateUserGcmId(userId, newGcmId);
     }
 }

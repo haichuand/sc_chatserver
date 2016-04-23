@@ -42,7 +42,7 @@ public class SuperDao {
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();
     private final Map<String, String> mNotificationKeyMap = new HashMap<String, String>();
-    private final ConcurrentHashMap<Integer, String> userGcmCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> userGcmCache = new ConcurrentHashMap<>();
     
     private SuperDao() {        
     }
@@ -105,15 +105,17 @@ public class SuperDao {
         return Integer.toString(nextRandom);
     }
     
-    public void addNewUser(int uId, String gcmId) {
+    public void addNewUser(String uId, String gcmId) {
+        System.out.println("new user: uId: "+ uId + ", gcmId: "+ gcmId);
         this.userGcmCache.put(uId, gcmId);
+        System.out.println(userGcmCache.size());
     }
     
-    public String getUserGcmId(int uId) {
+    public String getUserGcmId(String uId) {
         return this.userGcmCache.get(uId);
     }
     
-    public void updateUserGcmId(int uId, String newGcmId) {
+    public void updateUserGcmId(String uId, String newGcmId) {
         this.userGcmCache.replace(uId, newGcmId);
     }
     
@@ -146,9 +148,9 @@ public class SuperDao {
         gcmIdsJsonParser(gcmIdJson, this.userGcmCache);
     }
     
-    private void gcmIdsJsonParser (String gcmJson, ConcurrentHashMap<Integer, String> map) throws ParseException{
+    private void gcmIdsJsonParser (String gcmJson, ConcurrentHashMap<String, String> map) throws ParseException{
         JSONParser parser = new JSONParser();
-        int uId;
+        String uId;
         String gcmId;
         JSONObject obj = (JSONObject)parser.parse(gcmJson);
         if(obj.containsKey("usersGcmId")) {
@@ -156,7 +158,7 @@ public class SuperDao {
             for (int i = 0; i < array.size(); i++) {
                 JSONObject row = (JSONObject)array.get(i);
                 Long longUId =(Long)row.get("uId");
-                uId = Integer.valueOf(longUId.intValue());
+                uId = String.valueOf(longUId.intValue());
                 gcmId = (String)row.get("gcmId");
                 map.put(uId, gcmId);
             }

@@ -44,7 +44,7 @@ public class LoginProcessor implements PayloadProcessor {
             dao.addRegistration(msg.getFrom(), username);
         }
 
-        Map<String, Object> payload = new HashMap<>();
+        Map<String, String> payload = new HashMap<>();
         payload.put(ACTION, ProcessorFactory.ACTION_LOGIN);
         payload.put(STATUS, String.valueOf(status));
         payload.put(USERNAME, username);

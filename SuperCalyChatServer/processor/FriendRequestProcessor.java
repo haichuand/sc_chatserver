@@ -29,27 +29,29 @@ public class FriendRequestProcessor implements PayloadProcessor{
         SuperDao dao = SuperDao.getInstance();
         SmackCcsClient client = SmackCcsClient.getInstance();
         
-        int targetUserId = -1;
+        String targetUserId = "";
         List<String> recipients = new ArrayList<>();
         String collapseKey = "sample";
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
         
         //content of new payload
-        int senderId = -1;
+        String senderId = "";
         String action = "";
         
-        if(msg.getPayload().containsKey(CcsMessage.TARGET_USER_ID))
-            targetUserId = (Integer)msg.getPayload().get(CcsMessage.TARGET_USER_ID);
+        if(msg.getPayload().containsKey(CcsMessage.TARGET_USER_ID)) {
+            targetUserId = msg.getPayload().get(CcsMessage.TARGET_USER_ID);
+            recipients.add(dao.getUserGcmId(targetUserId));
+        }
         
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
-            senderId = (Integer)msg.getPayload().get(CcsMessage.SENDER_ID);
+            senderId = msg.getPayload().get(CcsMessage.SENDER_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);
         
         //create new payload
-        Map<String, Object> newPayload = new HashMap<>(msg.getPayload());
+        Map<String, String> newPayload = new HashMap<>(msg.getPayload());
         newPayload.put(CcsMessage.ACTION, action);
         newPayload.put(CcsMessage.SENDER_ID, senderId);
 

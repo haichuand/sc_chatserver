@@ -19,12 +19,7 @@ public class CcsMessage {
     public static final String ACTION = "action";
     public static final String MESSAGE = "message";
     public static final String CREATOR_ID = "creatorId";
-    public static final String START_TIME = "startTime";
-    public static final String END_TIME = "endTime";
-    public static final String CREATE_TIME = "createTime";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String LOCATION = "location";
-    public static final String TITLE = "title";
+    public static final String MEDIA_ID = "mediaId";
     public static final String GCM_ID = "gcmId";
     public static final String TARGET_USER_ID = "targetUserId";
     
@@ -43,9 +38,9 @@ public class CcsMessage {
     /**
      * Payload data. A String in Json format.
      */
-    private Map<String, Object> mPayload;
+    private Map<String, String> mPayload;
 
-    public CcsMessage(String from, String category, String messageId, Map<String, Object> payload) {
+    public CcsMessage(String from, String category, String messageId, Map<String, String> payload) {
         mFrom = from;
         mCategory = category;
         mMessageId = messageId;
@@ -64,7 +59,7 @@ public class CcsMessage {
         return mMessageId;
     }
 
-    public Map<String, Object> getPayload() {
+    public Map<String, String> getPayload() {
         return mPayload;
     }
 }

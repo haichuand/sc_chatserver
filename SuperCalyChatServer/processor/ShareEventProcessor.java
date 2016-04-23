@@ -40,40 +40,34 @@ public class ShareEventProcessor implements PayloadProcessor{
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
         //content of new payload
-        int creatorId = -1;
+        String creatorId = "";
         String action = "";
         String eventId = "";
-        String conversationId = "";
         
         if(msg.getPayload().containsKey(CcsMessage.CREATOR_ID))
-            creatorId = (Integer)msg.getPayload().get(CcsMessage.CREATOR_ID);
+            creatorId = msg.getPayload().get(CcsMessage.CREATOR_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
-            action = (String)msg.getPayload().get(CcsMessage.ACTION);
+            action = msg.getPayload().get(CcsMessage.ACTION);
         
         if(msg.getPayload().containsKey(CcsMessage.EVENT_ID))
-            conversationId = (String)msg.getPayload().get(CcsMessage.EVENT_ID);
-        
-        if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
-            conversationId = (String)msg.getPayload().get(CcsMessage.CONVERSATION_ID);
-        
+            eventId = msg.getPayload().get(CcsMessage.EVENT_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
                 for(String id: recipientsId) {
-                    if(!id.equals(String.valueOf(creatorId))) {
-                        recipients.add(dao.getUserGcmId(Integer.valueOf(id)));
+                    if(!id.equals(creatorId)) {
+                        recipients.add(dao.getUserGcmId(id));
                     }
                 }
             }
         }
         
         //create new payload
-        Map<String, Object> newPayload = new HashMap<>(msg.getPayload());
+        Map<String, String> newPayload = new HashMap<>();
         newPayload.put(CcsMessage.CREATOR_ID, creatorId);
         newPayload.put(CcsMessage.ACTION, action);
-        newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
         newPayload.put(CcsMessage.EVENT_ID, eventId);
 
         client.sendBroadcast(newPayload, collapseKey, timeToLive, delayWhileIdle, recipients);
