@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,6 +36,8 @@ import org.json.simple.parser.ParseException;
  * recipients for proper apps!
  */
 public class SuperDao {
+    
+    public static final Logger logger = Logger.getLogger(SuperDao.class.getName());
     
     private final static SuperDao instance = new SuperDao();
     private final static Random sRandom = new Random();
@@ -106,9 +110,8 @@ public class SuperDao {
     }
     
     public void addNewUser(String uId, String gcmId) {
-        System.out.println("new user: uId: "+ uId + ", gcmId: "+ gcmId);
         this.userGcmCache.put(uId, gcmId);
-        System.out.println(userGcmCache.size());
+        logger.log(Level.INFO, "New user added, uId: "+ uId + ", gcmId: " + gcmId);
     }
     
     public String getUserGcmId(String uId) {
@@ -117,6 +120,8 @@ public class SuperDao {
     
     public void updateUserGcmId(String uId, String newGcmId) {
         this.userGcmCache.replace(uId, newGcmId);
+        logger.log(Level.INFO, "Update user gcmId, uId: "+ uId + ", new gcmId: "
+                + newGcmId);
     }
     
     public void populateUserGcmCache() throws IOException, ParseException{
@@ -144,7 +149,7 @@ public class SuperDao {
         in.close();
         
         gcmIdJson = response.toString();
-        System.out.println("Response content : " + gcmIdJson);
+        logger.log(Level.INFO, "Populate the gcmId cache: "+ gcmIdJson);
         gcmIdsJsonParser(gcmIdJson, this.userGcmCache);
     }
     
