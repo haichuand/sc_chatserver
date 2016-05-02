@@ -15,28 +15,30 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Payload of DropConversationAttendee request contains:
- * senderId, conversationId, targetUserId, recipients, action
+ *
+ * @author xuejing
+ */
+/**
+ * Payload of UpdateConversationTitle request contains:
+ * senderId, conversationId, title, recipients, action
 **/
 
 /**
  * Payload of DropConversationAttendee send to recipients contains:
- * senderId, conversationId, targetUserId, action
+ * senderId, conversationId, title, action
 **/
-public class DropConversationAttendeeProcessor implements PayloadProcessor{
-    
+public class UpdateConversationTitleProcessor implements PayloadProcessor{
     @Override
     public void handleMessage(CcsMessage msg) { 
         SuperDao dao = SuperDao.getInstance();
         SmackCcsClient client = SmackCcsClient.getInstance();
         
         List<String> recipients = new ArrayList<>();
-        String collapseKey = "sample";
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
 
         String senderId = "";
-        String targetUserId = "";
+        String title = "";
         String action = "";
         String conversationId = "";
         
@@ -49,8 +51,8 @@ public class DropConversationAttendeeProcessor implements PayloadProcessor{
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
         
-        if(msg.getPayload().containsKey(CcsMessage.TARGET_USER_ID)) 
-            targetUserId = msg.getPayload().get(CcsMessage.TARGET_USER_ID);
+        if(msg.getPayload().containsKey(CcsMessage.TITLE)) 
+            title = msg.getPayload().get(CcsMessage.TITLE);
         
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
@@ -68,9 +70,10 @@ public class DropConversationAttendeeProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.SENDER_ID, senderId);
         newPayload.put(CcsMessage.ACTION, action);
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
-        newPayload.put(CcsMessage.TARGET_USER_ID, targetUserId);
+        newPayload.put(CcsMessage.TITLE, title);
         
-        client.sendBroadcast(newPayload, collapseKey, timeToLive, delayWhileIdle, recipients);
+        client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
         
     }
+    
 }

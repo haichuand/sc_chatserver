@@ -38,7 +38,6 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         SmackCcsClient client = SmackCcsClient.getInstance();
         
         List<String> recipients = new ArrayList<>();
-        String collapseKey = "sample";
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
         
@@ -79,6 +78,6 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.SENDER_ID, senderId);
         newPayload.put(CcsMessage.MESSAGE, message); 
         
-        client.sendBroadcast(newPayload, collapseKey, timeToLive, delayWhileIdle, recipients);
+        client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
     }
 }

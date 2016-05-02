@@ -27,7 +27,6 @@ public class LoginProcessor implements PayloadProcessor {
         List<String> recipients = new ArrayList<>();
         recipients.add(msg.getFrom());
 
-        String collapseKey = "sample";
         Long timeToLive = 10000L;
         Boolean delayWhileIdle = true;
 
@@ -49,7 +48,7 @@ public class LoginProcessor implements PayloadProcessor {
         payload.put(STATUS, String.valueOf(status));
         payload.put(USERNAME, username);
 
-        client.sendBroadcast(payload, collapseKey, timeToLive, delayWhileIdle,
+        client.sendBroadcast(payload, null, timeToLive, delayWhileIdle,
             recipients);
     }
 }

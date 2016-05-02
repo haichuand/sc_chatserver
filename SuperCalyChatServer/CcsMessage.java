@@ -22,6 +22,8 @@ public class CcsMessage {
     public static final String MEDIA_ID = "mediaId";
     public static final String GCM_ID = "gcmId";
     public static final String TARGET_USER_ID = "targetUserId";
+    public static final String TITLE = "title";   
+    public static final String USER_IDS = "userIds";
     
     /**
      * Recipient-ID.

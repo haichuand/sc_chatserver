@@ -16,9 +16,11 @@ public class ProcessorFactory {
     public static final String ACTION_START_CONVERSATION= "START_CONVERSATION";
     public static final String ACTION_CONVERSATION_MESSAGE = "CONVERSATION_MESSAGE";
     public static final String ACTION_FRIEND_REQUEST = "FRIEND_REQUEST";
-    public static final String ACTION_DROP_CONVERSATION_ATTENDEE = "DROP_CONVERSATION_ATTENDEE";
+    public static final String ACTION_DROP_CONVERSATION_ATTENDEES = "DROP_CONVERSATION_ATTENDEES";
     public static final String ACTION_UPDATE_GCM_ID = "UPDATE_GCM_ID";
     public static final String ACTION_LEAVE_CONVERSATION = "LEAVE_CONVERSATION";
+    public static final String ACTION_ADD_CONVERSATION_ATTENDEES = "ADD_CONVERSATION_ATTENDEES";
+    public static final String ACTION_UPDATE_CONVERSATION_TITLE = "UPDATE_CONVERSATION_TITLE";
 
     public static PayloadProcessor getProcessor(String action) {
         if (action == null) {
@@ -44,12 +46,16 @@ public class ProcessorFactory {
                 return new ConversationMessageProcessor();
             case ACTION_FRIEND_REQUEST:
                 return new ShareEventProcessor();
-            case ACTION_DROP_CONVERSATION_ATTENDEE:
-                return new DropConversationAttendeeProcessor();
+            case ACTION_DROP_CONVERSATION_ATTENDEES:
+                return new DropConversationAttendeesProcessor();
             case ACTION_UPDATE_GCM_ID:
                 return new UpdateGcmIdProcessor();
             case ACTION_LEAVE_CONVERSATION:
                 return new LeaveConversationProcessor();
+            case ACTION_ADD_CONVERSATION_ATTENDEES:
+                return new AddConversationAttendeesProcessor();
+            case ACTION_UPDATE_CONVERSATION_TITLE:
+                return new UpdateConversationTitleProcessor();
         }
 
         throw new IllegalStateException("Action " + action + " is unknown");
