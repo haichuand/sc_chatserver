@@ -36,6 +36,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.IOException;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -62,19 +64,66 @@ public class SmackCcsClient {
     public static final String GCM_NAMESPACE = "google:mobile:data";
 
     static Random random = new Random();
-    XMPPTCPConnection connection;
-    ConnectionConfiguration config;
+//    XMPPTCPConnection connection;
+//    ConnectionConfiguration config;
+    private static volatile SmackCcsClient instance;
 
     /// new: some additional instance and class members
     private static SmackCcsClient sInstance = null;
     private String mApiKey = null;
     private String mProjectId = null;
     private boolean mDebuggable = false;
+    
+    static {
+        ProviderManager.addExtensionProvider(GCM_ELEMENT_NAME,
+                GCM_NAMESPACE, new PacketExtensionProvider() {
 
+                    @Override
+                    public PacketExtension parseExtension(XmlPullParser parser)
+                    throws Exception {
+                        String json = parser.nextText();
+                        GcmPacketExtension packet = new GcmPacketExtension(json);
+                        return packet;
+                    }
+                });
+    }
+
+    private final Deque<Channel> channels;
+    
+    public static SmackCcsClient getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("You have to prepare the client first");
+        }
+        return instance;
+    }
+
+
+    public static SmackCcsClient prepareClient(String projectId, String apiKey, boolean debuggable) {
+        if (instance == null) {
+            synchronized (SmackCcsClient.class) {
+                if (instance == null) {
+                    instance = new SmackCcsClient(projectId, apiKey, debuggable);
+                }
+            }
+        }
+        return instance;
+    }
+
+    private SmackCcsClient(String projectId, String apiKey, boolean debuggable) {
+        mApiKey = apiKey;
+        mProjectId = projectId;
+        mDebuggable = debuggable;
+        channels = new ConcurrentLinkedDeque<Channel>();
+    }
+    
+    public void getConnected() throws XMPPException, SmackException, IOException {
+        channels.addFirst(connect());
+    }
+    
     /**
      * XMPP Packet Extension for GCM Cloud Connection Server.
      */
-    class GcmPacketExtension extends DefaultPacketExtension {
+    private static final class GcmPacketExtension extends DefaultPacketExtension {
 
         String json;
 
@@ -125,81 +174,74 @@ public class SmackCcsClient {
             };
         }
     }
-
-    public static SmackCcsClient getInstance() {
-        if (sInstance == null) {
-            throw new IllegalStateException("You have to prepare the client first");
-        }
-        return sInstance;
-    }
     
-    public static SmackCcsClient prepareClient(String projectId, String apiKey, boolean debuggable) {
-        synchronized(SmackCcsClient.class) {
-            if (sInstance == null) {
-                sInstance = new SmackCcsClient(projectId, apiKey, debuggable);
+    
+    private class Channel {
+        private XMPPConnection connection;
+        /**
+         * Indicates whether the connection is in draining state, which means that it will not accept any new downstream
+         * messages.
+         */
+        private volatile boolean connectionDraining = false;
+
+        /**
+         * Sends a packet with contents provided.
+         */
+        private void send(String jsonRequest){
+            Packet request = new GcmPacketExtension(jsonRequest).toPacket();
+            try{
+                connection.sendPacket(request);
+            }
+            catch(Exception e) {
+                e.printStackTrace();
             }
         }
-        return sInstance;
+
+        /**
+         * Handles a CONNECTION_DRAINING control message.
+         *
+         * <p>
+         * By default, it only logs a INFO message, but subclasses could
+         * override it to properly handle NACKS.
+         */
+        public void handleConnectionDraining(Map<String, Object> jsonObject) {
+            connectionDraining = true;
+            logger.log(Level.INFO, "handleConnectionDraining()");
+        }
     }
     
-    private SmackCcsClient(String projectId, String apiKey, boolean debuggable) {
-        this();
-        mApiKey = apiKey;
-        mProjectId = projectId;
-        mDebuggable = debuggable;
-    }
-
-    private SmackCcsClient() {
-        // Add GcmPacketExtension
-        ProviderManager.addExtensionProvider(GCM_ELEMENT_NAME,
-                GCM_NAMESPACE, new PacketExtensionProvider() {
-
-                    @Override
-                    public PacketExtension parseExtension(XmlPullParser parser)
-                    throws Exception {
-                        String json = parser.nextText();
-                        GcmPacketExtension packet = new GcmPacketExtension(json);
-                        return packet;
-                    }
-                });
-    }
-
-    /**
-     * Returns a random message id to uniquely identify a message.
-     *
-     * <p>
-     * Note: This is generated by current time stamp together a pseudo 
-     * with random number generator, very likely to be unique
-     *
-     */
-    public String getRandomMessageId() {
-        return "MessageFromServer-"+Long.toString(System.currentTimeMillis())
+        public String getRandomMessageId() {
+        return "MessageFromServer-" + Long.toString(System.currentTimeMillis())
                 + Long.toString(random.nextLong());
-    }
+        }
 
     /**
      * Sends a downstream GCM message.
      */
-    public void send(String jsonRequest) {
-        Packet request = new GcmPacketExtension(jsonRequest).toPacket();
-        try{
-        connection.sendPacket(request);
+    public void send(String message){
+        Channel channel = channels.peekFirst();
+        if (channel.connectionDraining) {
+            synchronized (channels) {
+                channel = channels.peekFirst();
+                if (channel.connectionDraining) {
+                    channels.addFirst(connect());
+                    channel = channels.peekFirst();
+                }
+            }
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
+        channel.send(message);
     }
 
     /// new: for sending messages to a list of recipients
     /**
-     * Sends a message to multiple recipients. Kind of like the old
-     * HTTP message with the list of regIds in the "registration_ids" field.
+     * Sends a message to multiple recipients. Kind of like the old HTTP message
+     * with the list of regIds in the "registration_ids" field.
      */
     public void sendBroadcast(Map<String, String> payload, String collapseKey,
-            long timeToLive, Boolean delayWhileIdle, List<String> recipients) {
+            long timeToLive, Boolean delayWhileIdle, List<String> recipients){
         Map map = createAttributeMap(null, null, payload, collapseKey,
-                    timeToLive, delayWhileIdle);
-        for (String toRegId: recipients) {
+                timeToLive, delayWhileIdle);
+        for (String toRegId : recipients) {
             String messageId = getRandomMessageId();
             map.put("message_id", messageId);
             map.put("to", toRegId);
@@ -207,21 +249,21 @@ public class SmackCcsClient {
             send(jsonRequest);
         }
     }
-    
+
     /// new: customized version of the standard handleIncomingDateMessage method
     /**
      * Handles an upstream data message from a device application.
      */
     public void handleIncomingDataMessage(CcsMessage msg) {
         if (msg.getPayload().get("action") != null) {
-            PayloadProcessor processor = ProcessorFactory.getProcessor((String)msg.getPayload().get("action"));
+            PayloadProcessor processor = ProcessorFactory.getProcessor((String) msg.getPayload().get("action"));
             processor.handleMessage(msg);
-        }   
+        }
     }
-    
+
     /// new: was previously part of the previous method
     /**
-     * 
+     *
      */
     private CcsMessage getMessage(Map<String, Object> jsonObject) {
         String from = jsonObject.get("from").toString();
@@ -231,7 +273,7 @@ public class SmackCcsClient {
 
         // unique id of this message
         String messageId = jsonObject.get("message_id").toString();
-        
+
         @SuppressWarnings("unchecked")
         Map<String, String> payload = (Map<String, String>) jsonObject.get("data");
 
@@ -239,7 +281,7 @@ public class SmackCcsClient {
 
         return msg;
     }
-    
+
     /**
      * Handles an ACK.
      *
@@ -250,7 +292,8 @@ public class SmackCcsClient {
     public void handleAckReceipt(Map<String, Object> jsonObject) {
         String messageId = jsonObject.get("message_id").toString();
         String from = jsonObject.get("from").toString();
-        logger.log(Level.INFO, "handleAckReceipt() from: " + from + ", messageId: " + messageId);
+        logger.log(Level.INFO, "handleAckReceipt() from: " + from + ", messageId: "
+                + messageId);
     }
 
     /**
@@ -263,7 +306,10 @@ public class SmackCcsClient {
     public void handleNackReceipt(Map<String, Object> jsonObject) {
         String messageId = jsonObject.get("message_id").toString();
         String from = jsonObject.get("from").toString();
-        logger.log(Level.INFO, "handleNackReceipt() from: " + from + ", messageId: " + messageId);
+        String error = jsonObject.get("error").toString();
+        String errorDescription = jsonObject.get("error_description").toString();
+        logger.log(Level.INFO, "handleNackReceipt() from: " + from + ", messageId: "
+                + messageId + ", error: " + error + ", errorDescription: " + errorDescription);
     }
 
     /**
@@ -283,7 +329,7 @@ public class SmackCcsClient {
         return createJsonMessage(createAttributeMap(to, messageId, payload,
                 collapseKey, timeToLive, delayWhileIdle));
     }
-    
+
     public static String createJsonMessage(Map map) {
         return JSONValue.toJSONString(map);
     }
@@ -345,101 +391,7 @@ public class SmackCcsClient {
         return JSONValue.toJSONString(message);
     }
 
-    /**
-     * Connects to GCM Cloud Connection Server using the supplied credentials.
-     * @throws XMPPException, SmackException, IOException
-     */
-    public void connect() throws XMPPException, SmackException, IOException {
-        config = new ConnectionConfiguration(GCM_SERVER, GCM_PORT);
-        config.setSecurityMode(SecurityMode.disabled);
-        config.setReconnectionAllowed(true);
-        config.setRosterLoadedAtLogin(false);
-        config.setSendPresence(false);
-        config.setSocketFactory(SSLSocketFactory.getDefault());
-
-        // NOTE: Set to true to launch a window with information about packets sent and received
-        //config.setDebuggerEnabled(mDebuggable);
-
-        // -Dsmack.debugEnabled=true
-
-        connection = new XMPPTCPConnection(config);
-        connection.connect();
-
-        connection.addConnectionListener(new ConnectionListener() {
-            @Override
-            public void authenticated(XMPPConnection connection) {
-                logger.info(connection.toString());
-            }
-            
-            @Override
-            public void connected(XMPPConnection connection) {
-                logger.log(Level.INFO, "Connection connected.");
-            }
-            
-            @Override
-            public void reconnectionSuccessful() {
-                logger.info("Reconnecting..");
-            }
-
-            @Override
-            public void reconnectionFailed(Exception e) {
-                logger.log(Level.INFO, "Reconnection failed.. ", e);
-            }
-
-            @Override
-            public void reconnectingIn(int seconds) {
-                logger.log(Level.INFO, "Reconnecting in %d secs", seconds);
-            }
-
-            @Override
-            public void connectionClosedOnError(Exception e) {
-                logger.log(Level.INFO, "Connection closed on error.");
-            }
-
-            @Override
-            public void connectionClosed() {
-                logger.info("Connection closed.");
-            }
-        });
-
-        // Handle incoming packets
-        connection.addPacketListener(new PacketListener() {
-
-            @Override
-            public void processPacket(Packet packet) {
-                logger.log(Level.INFO, "Received: " + packet.toXML());
-                System.out.println("new message is coming");
-                Message incomingMessage = (Message) packet;
-                GcmPacketExtension gcmPacket
-                        = (GcmPacketExtension) incomingMessage.getExtension(GCM_NAMESPACE);
-                String json = gcmPacket.getJson();
-                try {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> jsonMap
-                            = (Map<String, Object>) JSONValue.parseWithException(json);
-                    
-                    handleMessage(jsonMap);
-                } catch (ParseException e) {
-                    logger.log(Level.SEVERE, "Error parsing JSON " + json, e);
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Couldn't send echo.", e);
-                }
-            }
-        }, new PacketTypeFilter(Message.class));
-
-        // Log all outgoing packets
-        connection.addPacketInterceptor(new PacketInterceptor() {
-            @Override
-            public void interceptPacket(Packet packet) {
-                logger.log(Level.INFO, "Sent: {0}", packet.toXML());
-            }
-        }, new PacketTypeFilter(Message.class));
-
-        connection.login(mProjectId + "@gcm.googleapis.com", mApiKey);
-        logger.log(Level.INFO, "logged in: " + mProjectId);
-    }
-
-    private void handleMessage(Map<String, Object> jsonMap) {
+    private void handleMessage(Map<String, Object> jsonMap, Channel channel) {
         // present for "ack"/"nack", null otherwise
         Object messageType = jsonMap.get("message_type");
 
@@ -451,8 +403,7 @@ public class SmackCcsClient {
                 // Send ACK to CCS
                 String ack = createJsonAck(msg.getFrom(), msg.getMessageId());
                 send(ack);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 // Send NACK to CCS
                 e.printStackTrace();
                 String nack = createJsonNack(msg.getFrom(), msg.getMessageId());
@@ -464,9 +415,115 @@ public class SmackCcsClient {
         } else if ("nack".equals(messageType.toString())) {
             // Process Nack
             handleNackReceipt(jsonMap);
-        } else {
+        } else if("control".equals(messageType.toString())) {
+            //Process control message
+            Object controlType = jsonMap.get("control_type");
+            if("CONNECTION_DRAINING".equals(controlType.toString()))
+                channel.handleConnectionDraining(jsonMap);
+        } 
+        else {
             logger.log(Level.WARNING, "Unrecognized message type (%s)",
                     messageType.toString());
         }
     }
+
+    /**
+     * Connects to GCM Cloud Connection Server using the supplied credentials.
+     *
+     * @return
+     */
+    public Channel connect() {
+        try {
+            final Channel channel = new Channel();
+            ConnectionConfiguration config = new ConnectionConfiguration(GCM_SERVER, GCM_PORT);
+            config.setSecurityMode(SecurityMode.enabled);
+            config.setReconnectionAllowed(true);
+            config.setRosterLoadedAtLogin(false);
+            config.setSendPresence(false);
+            config.setSocketFactory(SSLSocketFactory.getDefault());
+
+            channel.connection = new XMPPTCPConnection(config);
+            channel.connection.connect();
+
+            channel.connection.addConnectionListener(new ConnectionListener() {
+                @Override
+                public void authenticated(XMPPConnection connection) {
+                    logger.info(connection.toString());
+                }
+
+                @Override
+                public void connected(XMPPConnection connection) {
+                    logger.log(Level.INFO, "Connection connected.");
+                }
+
+                @Override
+                public void reconnectionSuccessful() {
+                    logger.info("Reconnecting..");
+                }
+
+                @Override
+                public void reconnectionFailed(Exception e) {
+                    logger.log(Level.INFO, "Reconnection failed.. ", e);
+                }
+
+                @Override
+                public void reconnectingIn(int seconds) {
+                    logger.log(Level.INFO, "Reconnecting in %d secs", seconds);
+                }
+
+                @Override
+                public void connectionClosedOnError(Exception e) {
+                    logger.log(Level.INFO, "Connection closed on error.");
+                }
+
+                @Override
+                public void connectionClosed() {
+                    logger.info("Connection closed.");
+                }
+            });
+
+            // Handle incoming packets
+            channel.connection.addPacketListener(new PacketListener() {
+
+                @Override
+                public void processPacket(Packet packet) {
+                    logger.log(Level.INFO, "Received: " + packet.toXML());
+                    System.out.println("new message is coming");
+                    Message incomingMessage = (Message) packet;
+                    GcmPacketExtension gcmPacket
+                            = (GcmPacketExtension) incomingMessage.getExtension(GCM_NAMESPACE);
+                    String json = gcmPacket.getJson();
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> jsonMap
+                                = (Map<String, Object>) JSONValue.parseWithException(json);
+
+                        handleMessage(jsonMap, channel);
+                    } catch (ParseException e) {
+                        logger.log(Level.SEVERE, "Error parsing JSON " + json, e);
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Couldn't send echo.", e);
+                    }
+                }
+            }, new PacketTypeFilter(Message.class));
+
+            // Log all outgoing packets
+            channel.connection.addPacketInterceptor(new PacketInterceptor() {
+                @Override
+                public void interceptPacket(Packet packet) {
+                    logger.log(Level.INFO, "Sent: {0}", packet.toXML());
+                }
+            }, new PacketTypeFilter(Message.class));
+
+            channel.connection.login(mProjectId + "@gcm.googleapis.com", mApiKey);
+            logger.log(Level.INFO, "logged in: " + mProjectId);
+            
+            return channel;
+            
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in creating channel for GCM communication", e);
+            throw new RuntimeException(e);
+        }
+    }
+    
 }

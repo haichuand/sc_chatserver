@@ -27,7 +27,7 @@ public class SuperCalyChatServer {
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
 
         try {
-            ccsClient.connect();
+            ccsClient.getConnected();
         } 
         catch (SmackException.ConnectionException e) {
             logger.log(Level.SEVERE,e.getFailedAddresses().toString());
