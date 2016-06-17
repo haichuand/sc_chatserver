@@ -417,7 +417,7 @@ public class SmackCcsClient {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> jsonMap
                             = (Map<String, Object>) JSONValue.parseWithException(json);
-                    
+                    //TODO: Multi-threading can happen here!
                     handleMessage(jsonMap);
                 } catch (ParseException e) {
                     logger.log(Level.SEVERE, "Error parsing JSON " + json, e);
