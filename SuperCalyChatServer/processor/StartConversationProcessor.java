@@ -56,9 +56,7 @@ public class StartConversationProcessor implements PayloadProcessor{
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
                 for(String id: recipientsId) {
-                    if(!id.equals(creatorId)) {
-                        recipients.add(dao.getUserGcmId(id));
-                    }
+                    recipients.add(dao.getUserGcmId(id));
                 }
             }
         }

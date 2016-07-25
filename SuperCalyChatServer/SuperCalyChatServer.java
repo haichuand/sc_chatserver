@@ -53,8 +53,14 @@ public class SuperCalyChatServer {
             e.printStackTrace();
         }
         
-        while(true)
-        {;}
+        while(true){
+            try{
+               Thread.sleep(50);
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
     
 }

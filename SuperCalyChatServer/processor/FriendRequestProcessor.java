@@ -43,8 +43,10 @@ public class FriendRequestProcessor implements PayloadProcessor{
             recipients.add(dao.getUserGcmId(targetUserId));
         }
         
-        if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
+        if(msg.getPayload().containsKey(CcsMessage.SENDER_ID)) {
             senderId = msg.getPayload().get(CcsMessage.SENDER_ID);
+            recipients.add(dao.getUserGcmId(senderId));
+        }
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);

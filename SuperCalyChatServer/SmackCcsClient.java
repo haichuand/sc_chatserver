@@ -516,7 +516,7 @@ public class SmackCcsClient {
             }, new PacketTypeFilter(Message.class));
 
             channel.connection.login(mProjectId + "@gcm.googleapis.com", mApiKey);
-            logger.log(Level.INFO, "logged in: " + mProjectId);
+            logger.log(Level.INFO, "Logged in: " + mProjectId);
             
             return channel;
             

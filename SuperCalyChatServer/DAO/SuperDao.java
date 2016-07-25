@@ -41,7 +41,7 @@ public class SuperDao {
     
     private final static SuperDao instance = new SuperDao();
     private final static Random sRandom = new Random();
-    private final String host = "http://localhost:8080/SuperCaly/rest";
+    private final String host = "http://52.25.71.19:8080/SuperCaly/rest";
     private final Set<Integer> mMessageIds = new HashSet<Integer>();
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();

@@ -55,9 +55,7 @@ public class DropConversationAttendeesProcessor implements PayloadProcessor{
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
                 for(String id: recipientsId) {
-                    if(!id.equals(senderId)) {
-                        recipients.add(dao.getUserGcmId(id));
-                    }
+                    recipients.add(dao.getUserGcmId(id));
                 }
             }
         }
