@@ -390,7 +390,6 @@ public class SmackCcsClient {
         message.put("message_id", messageId);
         return JSONValue.toJSONString(message);
     }
-
     private void handleMessage(Map<String, Object> jsonMap, Channel channel) {
         // present for "ack"/"nack", null otherwise
         Object messageType = jsonMap.get("message_type");
