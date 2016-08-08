@@ -245,6 +245,7 @@ public class SmackCcsClient {
             String messageId = getRandomMessageId();
             map.put("message_id", messageId);
             map.put("to", toRegId);
+            map.put("priority", "high");
             String jsonRequest = createJsonMessage(map);
             send(jsonRequest);
         }
