@@ -46,6 +46,7 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         String message = "";
         String senderId = "";
         String action = "";
+        String attachments = "";
        
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
@@ -68,6 +69,8 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         
         if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
             message = (String)msg.getPayload().get(CcsMessage.MESSAGE);
+        if (msg.getPayload().containsKey(CcsMessage.ATTACHMENTS))
+            attachments = msg.getPayload().get(CcsMessage.ATTACHMENTS);
         
         //create new payload
         Map<String, String> newPayload = new HashMap<>();
@@ -75,6 +78,7 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.ACTION, action);
         newPayload.put(CcsMessage.SENDER_ID, senderId);
         newPayload.put(CcsMessage.MESSAGE, message); 
+        newPayload.put(CcsMessage.ATTACHMENTS, attachments);
         
         client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
     }
