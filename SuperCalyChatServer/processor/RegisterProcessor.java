@@ -19,6 +19,7 @@ import java.util.Map;
 **/
 
 public class RegisterProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
 
     @Override
     public void handleMessage(CcsMessage msg) {
@@ -29,8 +30,7 @@ public class RegisterProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
-        
+
         String senderId = "";
         String gcmId = "";
         String action = "";

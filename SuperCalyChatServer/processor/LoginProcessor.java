@@ -19,6 +19,8 @@ public class LoginProcessor implements PayloadProcessor {
     public static final int STATUS_OK = 0;
     public static final int STATUS_FAILED = 1;
 
+    private static final boolean delayWhileIdle = false;
+
     @Override
     public void handleMessage(CcsMessage msg) {
         SuperDao dao = SuperDao.getInstance();
@@ -28,20 +30,19 @@ public class LoginProcessor implements PayloadProcessor {
         recipients.add(msg.getFrom());
 
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
 
         int status = STATUS_OK;
 
         String username = (String)msg.getPayload().get(USERNAME);
         String password = (String)msg.getPayload().get(PASSWORD);
 
-        if (!password.equals(password)) {
-            status = STATUS_FAILED;
-        }
+//        if (!password.equals(password)) {
+//            status = STATUS_FAILED;
+//        }
 
-        if (status == STATUS_OK) {
+//        if (status == STATUS_OK) {
             dao.addRegistration(msg.getFrom(), username);
-        }
+//        }
 
         Map<String, String> payload = new HashMap<>();
         payload.put(ACTION, ProcessorFactory.ACTION_LOGIN);

@@ -29,6 +29,8 @@ import java.util.Map;
  * senderId, conversationId, action
 **/
 public class UpdateEventProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
+
     @Override
     public void handleMessage(CcsMessage msg) {
         SuperDao dao = SuperDao.getInstance();
@@ -36,7 +38,6 @@ public class UpdateEventProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
 
         String senderId = "";
         String action = "";

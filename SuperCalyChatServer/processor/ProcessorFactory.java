@@ -21,6 +21,7 @@ public class ProcessorFactory {
     public static final String ACTION_LEAVE_CONVERSATION = "LEAVE_CONVERSATION";
     public static final String ACTION_ADD_CONVERSATION_ATTENDEES = "ADD_CONVERSATION_ATTENDEES";
     public static final String ACTION_UPDATE_CONVERSATION_TITLE = "UPDATE_CONVERSATION_TITLE";
+    public static final String ACTION_START_EVENT_CONVERSATION = "startEventConversation";
 
     public static PayloadProcessor getProcessor(String action) {
         if (action == null) {
@@ -36,6 +37,8 @@ public class ProcessorFactory {
                 return new EchoProcessor();
             case ACTION_MESSAGE:
                 return new MessageProcessor();
+            case ACTION_START_EVENT_CONVERSATION:
+                //fall through
             case ACTION_SHARE_EVENT:
                 return new ShareEventProcessor();
             case ACTION_UPDATE_EVENT:

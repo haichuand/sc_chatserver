@@ -17,6 +17,7 @@ import java.util.Map;
 import org.json.simple.parser.ParseException;
 
 public class MessageProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
 
     @Override
     public void handleMessage(CcsMessage msg) {
@@ -25,8 +26,7 @@ public class MessageProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
-        
+
         // new json payload content
         String conversationId = "";
         String message = "";

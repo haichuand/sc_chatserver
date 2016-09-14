@@ -23,6 +23,7 @@ import java.util.Map;
  * sender_id, action 
 **/
 public class FriendRequestProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
     
     @Override
     public void handleMessage(CcsMessage msg) { 
@@ -32,8 +33,7 @@ public class FriendRequestProcessor implements PayloadProcessor{
         String targetUserId = "";
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
-        
+
         //content of new payload
         String senderId = "";
         String action = "";

@@ -24,6 +24,8 @@ import java.util.Map;
 **/
 
 public class UpdateGcmIdProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = true;
+
     @Override
     public void handleMessage(CcsMessage msg) { 
         SmackCcsClient client = SmackCcsClient.getInstance();
@@ -31,8 +33,7 @@ public class UpdateGcmIdProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
-        
+
         String senderId = "";
         String newGcmId = "";
         String action = "";

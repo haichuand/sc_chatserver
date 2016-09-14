@@ -25,6 +25,8 @@ import java.util.Map;
 **/
 
 public class LeaveConversationProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
+
     @Override
     public void handleMessage(CcsMessage msg) { 
         SuperDao dao = SuperDao.getInstance();
@@ -32,7 +34,6 @@ public class LeaveConversationProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
 
         String senderId = "";
         String action = "";

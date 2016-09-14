@@ -31,6 +31,7 @@ import java.util.Map;
 **/
 
 public class ConversationMessageProcessor implements PayloadProcessor{
+    private static final boolean delayWhileIdle = false;
     
     @Override
     public void handleMessage(CcsMessage msg) {
@@ -39,13 +40,13 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         
         List<String> recipients = new ArrayList<>();
         Long timeToLive = 10000L;
-        Boolean delayWhileIdle = true;
         
         // new json payload content
         String conversationId = "";
         String message = "";
         String senderId = "";
         String action = "";
+        String messageId = "";
        
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
@@ -55,6 +56,10 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = msg.getPayload().get(CcsMessage.ACTION);
+
+        if (msg.getPayload().containsKey(CcsMessage.MESSAGE_ID)) {
+            messageId = msg.getPayload().get(CcsMessage.MESSAGE_ID);
+        }
         
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
@@ -74,7 +79,8 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
         newPayload.put(CcsMessage.ACTION, action);
         newPayload.put(CcsMessage.SENDER_ID, senderId);
-        newPayload.put(CcsMessage.MESSAGE, message); 
+        newPayload.put(CcsMessage.MESSAGE, message);
+        newPayload.put(CcsMessage.MESSAGE_ID, messageId);
         
         client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
     }
