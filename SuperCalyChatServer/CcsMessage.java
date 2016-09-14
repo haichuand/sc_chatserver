@@ -25,7 +25,8 @@ public class CcsMessage {
     public static final String TITLE = "title";   
     public static final String USER_IDS = "userIds";
     public static final String MESSAGE_ID = "messageId";
-    
+    public static final String ATTACHMENTS = "attachments";
+
     /**
      * Recipient-ID.
      */

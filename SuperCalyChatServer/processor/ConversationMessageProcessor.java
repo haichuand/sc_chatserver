@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class ConversationMessageProcessor implements PayloadProcessor{
     private static final boolean delayWhileIdle = false;
-    
+
     @Override
     public void handleMessage(CcsMessage msg) {
         SuperDao dao = SuperDao.getInstance();
@@ -47,7 +47,8 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         String senderId = "";
         String action = "";
         String messageId = "";
-       
+        String attachments = "";
+
         if(msg.getPayload().containsKey(CcsMessage.CONVERSATION_ID))
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
         
@@ -60,7 +61,7 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         if (msg.getPayload().containsKey(CcsMessage.MESSAGE_ID)) {
             messageId = msg.getPayload().get(CcsMessage.MESSAGE_ID);
         }
-        
+
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
@@ -73,7 +74,9 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         
         if(msg.getPayload().containsKey(CcsMessage.MESSAGE))
             message = (String)msg.getPayload().get(CcsMessage.MESSAGE);
-        
+        if (msg.getPayload().containsKey(CcsMessage.ATTACHMENTS))
+            attachments = msg.getPayload().get(CcsMessage.ATTACHMENTS);
+
         //create new payload
         Map<String, String> newPayload = new HashMap<>();
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
@@ -81,7 +84,8 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.SENDER_ID, senderId);
         newPayload.put(CcsMessage.MESSAGE, message);
         newPayload.put(CcsMessage.MESSAGE_ID, messageId);
-        
+        newPayload.put(CcsMessage.ATTACHMENTS, attachments);
+
         client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
     }
 }
