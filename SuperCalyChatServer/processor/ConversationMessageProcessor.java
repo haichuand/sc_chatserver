@@ -85,6 +85,7 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         newPayload.put(CcsMessage.MESSAGE, message);
         newPayload.put(CcsMessage.MESSAGE_ID, messageId);
         newPayload.put(CcsMessage.ATTACHMENTS, attachments);
+        newPayload.put(CcsMessage.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 
         client.sendBroadcast(newPayload, null, timeToLive, delayWhileIdle, recipients);
     }
