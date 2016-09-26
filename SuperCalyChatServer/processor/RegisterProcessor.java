@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Payload of Register contains:
- * senderId, gmcId, action
+ * senderId, fcmId, action
 **/
 
 public class RegisterProcessor implements PayloadProcessor{
@@ -32,7 +32,7 @@ public class RegisterProcessor implements PayloadProcessor{
         Long timeToLive = 10000L;
 
         String senderId = "";
-        String gcmId = "";
+        String fcmId = "";
         String action = "";
         System.out.println(msg.getPayload().toString());
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID)) 
@@ -41,11 +41,11 @@ public class RegisterProcessor implements PayloadProcessor{
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);
         
-        if(msg.getPayload().containsKey(CcsMessage.GCM_ID)) {
-            gcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
-            recipients.add(gcmId);
+        if(msg.getPayload().containsKey(CcsMessage.FCM_ID)) {
+            fcmId = (String)msg.getPayload().get(CcsMessage.FCM_ID);
+            recipients.add(fcmId);
         }
-        SuperDao.getInstance().addNewUser(senderId, gcmId);
+        SuperDao.getInstance().addNewUser(senderId, fcmId);
         
         //create new payload
         Map<String, String> newPayload = new HashMap<>();

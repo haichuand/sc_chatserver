@@ -60,7 +60,7 @@ public class AddConversationAttendeesProcessor implements PayloadProcessor{
             List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
             if(recipientsId != null) {
                 for(String id: recipientsId) {
-                    recipients.add(dao.getUserGcmId(id));
+                    recipients.add(dao.getUserFcmId(id));
                 }
             }
         }

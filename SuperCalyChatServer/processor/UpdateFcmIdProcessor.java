@@ -19,11 +19,11 @@ import java.util.Map;
  */
 
 /**
- * Payload of UpdateGcmId request contains:
- * senderId, gcmId, action
+ * Payload of UpdateFcmId request contains:
+ * senderId, newFcmId, action
 **/
 
-public class UpdateGcmIdProcessor implements PayloadProcessor{
+public class UpdateFcmIdProcessor implements PayloadProcessor{
     private static final boolean delayWhileIdle = true;
 
     @Override
@@ -35,7 +35,7 @@ public class UpdateGcmIdProcessor implements PayloadProcessor{
         Long timeToLive = 10000L;
 
         String senderId = "";
-        String newGcmId = "";
+        String newFcmId = "";
         String action = "";
         
         if(msg.getPayload().containsKey(CcsMessage.SENDER_ID))
@@ -44,12 +44,12 @@ public class UpdateGcmIdProcessor implements PayloadProcessor{
         if(msg.getPayload().containsKey(CcsMessage.ACTION))
             action = (String)msg.getPayload().get(CcsMessage.ACTION);
         
-        if(msg.getPayload().containsKey(CcsMessage.GCM_ID)) {
-            newGcmId = (String)msg.getPayload().get(CcsMessage.GCM_ID);
-            recipients.add(newGcmId);
+        if(msg.getPayload().containsKey(CcsMessage.FCM_ID)) {
+            newFcmId = (String)msg.getPayload().get(CcsMessage.FCM_ID);
+            recipients.add(newFcmId);
         }
         
-        SuperDao.getInstance().updateUserGcmId(senderId, newGcmId);
+        SuperDao.getInstance().updateUserFcmId(senderId, newFcmId);
         
         //create new payload
         Map<String, String> newPayload = new HashMap<>();

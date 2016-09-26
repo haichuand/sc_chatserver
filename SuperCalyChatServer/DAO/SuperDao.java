@@ -46,7 +46,7 @@ public class SuperDao {
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();
     private final Map<String, String> mNotificationKeyMap = new HashMap<String, String>();
-    private final ConcurrentHashMap<String, String> userGcmCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> userFcmCache = new ConcurrentHashMap<>();
     
     private SuperDao() {        
     }
@@ -109,24 +109,24 @@ public class SuperDao {
         return Integer.toString(nextRandom);
     }
     
-    public void addNewUser(String uId, String gcmId) {
-        this.userGcmCache.put(uId, gcmId);
-        logger.log(Level.INFO, "New user added, uId: "+ uId + ", gcmId: " + gcmId);
+    public void addNewUser(String uId, String fcmId) {
+        this.userFcmCache.put(uId, fcmId);
+        logger.log(Level.INFO, "New user added, uId: "+ uId + ", fcmId: " + fcmId);
     }
     
-    public String getUserGcmId(String uId) {
-        return this.userGcmCache.get(uId);
+    public String getUserFcmId(String uId) {
+        return this.userFcmCache.get(uId);
     }
     
-    public void updateUserGcmId(String uId, String newGcmId) {
-        this.userGcmCache.replace(uId, newGcmId);
-        logger.log(Level.INFO, "Update user gcmId, uId: "+ uId + ", new gcmId: "
-                + newGcmId);
+    public void updateUserFcmId(String uId, String newFcmId) {
+        this.userFcmCache.replace(uId, newFcmId);
+        logger.log(Level.INFO, "Update user fcmId, uId: "+ uId + ", new fcmId: "
+                + newFcmId);
     }
     
-    public void populateUserGcmCache() throws IOException, ParseException{
-        String url = host + "/user/getAllUserIdAndGcmId";
-        String gcmIdJson;
+    public void populateUserFcmCache() throws IOException, ParseException{
+        String url = host + "/user/getAllUserIdAndFcmId";
+        String fcmIdJson;
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -148,24 +148,24 @@ public class SuperDao {
         
         in.close();
         
-        gcmIdJson = response.toString();
-        logger.log(Level.INFO, "Populate the gcmId cache: "+ gcmIdJson);
-        gcmIdsJsonParser(gcmIdJson, this.userGcmCache);
+        fcmIdJson = response.toString();
+        logger.log(Level.INFO, "Populate the fcmId cache: "+ fcmIdJson);
+        fcmIdsJsonParser(fcmIdJson, this.userFcmCache);
     }
     
-    private void gcmIdsJsonParser (String gcmJson, ConcurrentHashMap<String, String> map) throws ParseException{
+    private void fcmIdsJsonParser (String fcmJson, ConcurrentHashMap<String, String> map) throws ParseException{
         JSONParser parser = new JSONParser();
         String uId;
-        String gcmId;
-        JSONObject obj = (JSONObject)parser.parse(gcmJson);
-        if(obj.containsKey("usersGcmId")) {
-            JSONArray array = (JSONArray)obj.get("usersGcmId");
+        String fcmId;
+        JSONObject obj = (JSONObject)parser.parse(fcmJson);
+        if(obj.containsKey("usersFcmId")) {
+            JSONArray array = (JSONArray)obj.get("usersFcmId");
             for (int i = 0; i < array.size(); i++) {
                 JSONObject row = (JSONObject)array.get(i);
                 Long longUId =(Long)row.get("uId");
                 uId = String.valueOf(longUId.intValue());
-                gcmId = (String)row.get("gcmId");
-                map.put(uId, gcmId);
+                fcmId = (String)row.get("fcmId");
+                map.put(uId, fcmId);
             }
         }
     }

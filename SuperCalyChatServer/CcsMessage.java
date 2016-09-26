@@ -20,7 +20,7 @@ public class CcsMessage {
     public static final String MESSAGE = "message";
     public static final String CREATOR_ID = "creatorId";
     public static final String MEDIA_ID = "mediaId";
-    public static final String GCM_ID = "gcmId";
+    public static final String FCM_ID = "fcmId";
     public static final String TARGET_USER_ID = "targetUserId";
     public static final String TITLE = "title";   
     public static final String USER_IDS = "userIds";

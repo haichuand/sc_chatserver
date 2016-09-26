@@ -20,9 +20,9 @@ import org.json.simple.parser.ParseException;
 public class SuperCalyChatServer {
     
     public static void main(String[] args) {
-        final String projectId = "115711938538";
-        final String password = "AIzaSyDYP8RiorJWNGwP8gSuaxoevvFQkyJH_6c";
-       
+        final String projectId = "1076145801492";
+        final String password = "AIzaSyA_B4SmgfKpMbSp32jJbWrCqQ6YxGAhoMo";
+
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
 
@@ -45,7 +45,7 @@ public class SuperCalyChatServer {
         
         try {
             
-            SuperDao.getInstance().populateUserGcmCache();
+            SuperDao.getInstance().populateUserFcmCache();
             
         } catch (IOException e) {
             e.printStackTrace();

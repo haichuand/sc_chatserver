@@ -17,7 +17,7 @@ public class ProcessorFactory {
     public static final String ACTION_CONVERSATION_MESSAGE = "CONVERSATION_MESSAGE";
     public static final String ACTION_FRIEND_REQUEST = "FRIEND_REQUEST";
     public static final String ACTION_DROP_CONVERSATION_ATTENDEES = "DROP_CONVERSATION_ATTENDEES";
-    public static final String ACTION_UPDATE_GCM_ID = "UPDATE_GCM_ID";
+    public static final String ACTION_UPDATE_FCM_ID = "UPDATE_FCM_ID";
     public static final String ACTION_LEAVE_CONVERSATION = "LEAVE_CONVERSATION";
     public static final String ACTION_ADD_CONVERSATION_ATTENDEES = "ADD_CONVERSATION_ATTENDEES";
     public static final String ACTION_UPDATE_CONVERSATION_TITLE = "UPDATE_CONVERSATION_TITLE";
@@ -51,8 +51,8 @@ public class ProcessorFactory {
                 return new ShareEventProcessor();
             case ACTION_DROP_CONVERSATION_ATTENDEES:
                 return new DropConversationAttendeesProcessor();
-            case ACTION_UPDATE_GCM_ID:
-                return new UpdateGcmIdProcessor();
+            case ACTION_UPDATE_FCM_ID:
+                return new UpdateFcmIdProcessor();
             case ACTION_LEAVE_CONVERSATION:
                 return new LeaveConversationProcessor();
             case ACTION_ADD_CONVERSATION_ATTENDEES:

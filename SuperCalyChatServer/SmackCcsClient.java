@@ -57,8 +57,8 @@ public class SmackCcsClient {
 
     public static final Logger logger = Logger.getLogger(SmackCcsClient.class.getName());
 
-    public static final String GCM_SERVER = "gcm-xmpp.googleapis.com";
-    public static final int GCM_PORT = 5235;
+    public static final String FCM_SERVER = "fcm-xmpp.googleapis.com";
+    public static final int FCM_PORT = 5235;
 
     public static final String GCM_ELEMENT_NAME = "gcm";
     public static final String GCM_NAMESPACE = "google:mobile:data";
@@ -435,7 +435,7 @@ public class SmackCcsClient {
     public Channel connect() {
         try {
             final Channel channel = new Channel();
-            ConnectionConfiguration config = new ConnectionConfiguration(GCM_SERVER, GCM_PORT);
+            ConnectionConfiguration config = new ConnectionConfiguration(FCM_SERVER, FCM_PORT);
             config.setSecurityMode(SecurityMode.enabled);
             config.setReconnectionAllowed(true);
             config.setRosterLoadedAtLogin(false);
