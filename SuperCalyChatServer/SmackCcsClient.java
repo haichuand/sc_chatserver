@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -209,22 +208,9 @@ public class SmackCcsClient {
             connectionDraining = true;
             logger.log(Level.INFO, "handleConnectionDraining()");
 
-            // All Connections Draining? Create New Connection
+            // Create New Connection
             synchronized (channels) {
-                boolean hasAvailableConnections = false;
-                Iterator<Channel> iterator = channels.iterator();
-
-                while (iterator.hasNext()) {
-                    Channel channel = iterator.next();
-                    if (!channel.connectionDraining) {
-                        hasAvailableConnections = true;
-                        break;
-                    }
-                }
-
-                if (!hasAvailableConnections) {
-                    channels.addFirst(connect());
-                }
+                channels.addFirst(connect());
             }
         }
     }
@@ -239,23 +225,6 @@ public class SmackCcsClient {
      */
     public void send(String message){
         Channel channel = channels.peekFirst();
-
-        if (channel.connectionDraining) {
-            // Reroute to Available Connection
-            synchronized (channels) {
-                Iterator<Channel> iterator = channels.iterator();
-    
-                while (iterator.hasNext()) {
-                    channel = iterator.next();
-                    if (!channel.connectionDraining) {
-                        iterator.remove();
-                        channels.addFirst(channel); // Move to First
-                        break;
-                    }
-                }
-            }
-        }
-
         channel.send(message);
     }
 
