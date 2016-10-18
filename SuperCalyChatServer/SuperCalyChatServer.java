@@ -21,15 +21,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
  * @author xuejing
  */
 public class SuperCalyChatServer {
-    
-    private static ServerSocket socket;
-    public static int PORT = 9000;
+
 
     public static void main(String[] args) throws IOException {
         final String projectId = "1076145801492";
@@ -37,7 +36,9 @@ public class SuperCalyChatServer {
 	
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
-
+        Thread t = new Thread(new httpserver());
+        t.start();
+        
         try {
             ccsClient.getConnected();
         } 
@@ -64,93 +65,18 @@ public class SuperCalyChatServer {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        
-        try
-        {
-            socket = new ServerSocket(PORT);
-            System.out.println("Waiting for clients requests....\n");
+       
             while(true){
-               Thread.sleep(50);
-               Socket client = socket.accept();
-               proccessRequest(client);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SuperCalyChatServer.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        catch(Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
-        finally
-        {
-            socket.close();
-        }
-        
-        
-    }
-
-    private static void proccessRequest(Socket client) {
-        String str;
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            str = reader.readLine();
-            if(str != null)
-            {
-                if(str.trim().contains("HTTP"))
-                {
-                    sendResponse(client);
-                }
+               
             }
-        }
-        catch(IOException e)
-        {
-            
-        }
-    }
-
-    private static void sendResponse(Socket client) throws IOException {
-         
-        String statusCode = "200";
-        String reasonPhrase = "OK";
-        HashMap<String,String> headers = new HashMap<>(); 
-        String message = "<p>Chat Server Running fine!</p>";
-        String version = "HTTP/1.1";
-        String response = "";
  
-        headers.put("Date", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("GMT"))));
-        headers.put("Server", "ChatServer");
-        headers.put("Content-Type","text/html");
-        headers.put("Content-Length", Integer.toString(message.getBytes().length));
         
-        response += version;
-        response += " " + statusCode;
-        response += " " + reasonPhrase;
-        response += "\r\n";
-        if(headers != null)
-        {
-            for(Map.Entry<String, String> entry : headers.entrySet())
-            {
-                response += entry.getKey()+ ":" + entry.getValue() + "\r\n";
-            }
-        }
-        response += "\r\n";
-        if(message != null)
-        {
-            response += message;
-        }
         
-        try
-        {
-        client.getOutputStream().write(response.getBytes());
-        client.getOutputStream().flush();
-        }
-        catch(IOException e)
-        {
-             e.printStackTrace();
-        }
-        finally
-        {
-            client.close();
-        }
-    }
-    
+    }  
     
 }
