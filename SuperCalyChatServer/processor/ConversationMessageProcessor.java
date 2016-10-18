@@ -8,11 +8,8 @@ package SuperCalyChatServer.processor;
 import SuperCalyChatServer.CcsMessage;
 import SuperCalyChatServer.DAO.SuperDao;
 import SuperCalyChatServer.SmackCcsClient;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  *
@@ -63,11 +60,9 @@ public class ConversationMessageProcessor implements PayloadProcessor{
         }
 
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
-            List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
-            if(recipientsId != null) {
-                for(String id: recipientsId) {
-                    recipients.add(dao.getUserFcmId(id));
-                }
+            List<String> recipientsId = Arrays.asList((msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
+            for(String id: recipientsId) {
+                recipients.add(dao.getUserFcmId(id));
             }
         }
         
