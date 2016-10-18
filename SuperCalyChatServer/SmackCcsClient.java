@@ -1,45 +1,34 @@
 
 package SuperCalyChatServer;
 
+import SuperCalyChatServer.mail.ConversationHelper;
+import SuperCalyChatServer.mail.EmailHandler;
+import SuperCalyChatServer.mail.HttpServerManager;
+import SuperCalyChatServer.model.Conversation;
 import SuperCalyChatServer.processor.PayloadProcessor;
 import SuperCalyChatServer.processor.ProcessorFactory;
-import SuperCalyChatServer.DAO.SuperDao;
-import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
-import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.PacketInterceptor;
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.DefaultPacketExtension;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.PacketExtension;  
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.util.XmlStringBuilder;
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.SmackException.ConnectionException;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.io.IOException;
-import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import javax.net.ssl.SSLSocketFactory;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sample Smack implementation of a client for GCM Cloud Connection Server. 
@@ -73,7 +62,10 @@ public class SmackCcsClient {
     private String mApiKey = null;
     private String mProjectId = null;
     private boolean mDebuggable = false;
-    
+
+    private EmailHandler emailHandler;
+    private HttpServerManager httpServerManager;
+
     static {
         ProviderManager.addExtensionProvider(GCM_ELEMENT_NAME,
                 GCM_NAMESPACE, new PacketExtensionProvider() {
@@ -114,6 +106,8 @@ public class SmackCcsClient {
         mProjectId = projectId;
         mDebuggable = debuggable;
         channels = new ConcurrentLinkedDeque<Channel>();
+        emailHandler = new EmailHandler();
+        httpServerManager = new HttpServerManager();
     }
     
     public void getConnected() throws XMPPException, SmackException, IOException {
@@ -237,13 +231,41 @@ public class SmackCcsClient {
             long timeToLive, Boolean delayWhileIdle, List<String> recipients){
         Map map = createAttributeMap(null, null, payload, collapseKey,
                 timeToLive, delayWhileIdle);
+        String subject = "";
+        String text = "";
+        Map<String, String> headers = new HashMap<>();
         for (String toRegId : recipients) {
-            String messageId = getRandomMessageId();
-            map.put("message_id", messageId);
-            map.put("to", toRegId);
-            map.put("priority", "high");
-            String jsonRequest = createJsonMessage(map);
-            send(jsonRequest);
+            System.out.println("To: " + toRegId);
+            if (toRegId.contains("@")) { //send email
+                switch (payload.get(CcsMessage.ACTION)) {
+                    case ProcessorFactory.ACTION_START_EVENT_CONVERSATION:
+                        Conversation conversation = httpServerManager.getEventConversation(payload.get(CcsMessage.EVENT_ID));
+                        if (conversation != null) {
+                            subject = "Chat: " + conversation.title;
+                            text = httpServerManager.getUserName(payload.get(CcsMessage.CREATOR_ID)) + " invited you to a chat!\n"
+                                    + "Event title: " + conversation.eventTitle + "\n"
+                                    + "Time: " + ConversationHelper.getDateTimeString(conversation) + "\n"
+                                    + "Attendees: " + httpServerManager.getAttendeeNames(conversation) + "\n"
+                                    + "You can reply to this email to send message.";
+                            headers.put("Reply-To", ConversationHelper.getConversationReplyTo(conversation.id));
+                        }
+                        break;
+                    case ProcessorFactory.ACTION_CONVERSATION_MESSAGE:
+                        String conversationId = payload.get(CcsMessage.CONVERSATION_ID);
+                        subject = "Chat: " + httpServerManager.getConversationTitle(conversationId);
+                        text = httpServerManager.getUserName(payload.get(CcsMessage.SENDER_ID)) + " says: " + payload.get(CcsMessage.MESSAGE);
+                        headers.put("Reply-To", ConversationHelper.getConversationReplyTo(conversationId));
+                        break;
+                }
+                emailHandler.sendEmail(toRegId, subject, text, headers);
+            } else {
+                String messageId = getRandomMessageId();
+                map.put("message_id", messageId);
+                map.put("to", toRegId);
+                map.put("priority", "high");
+                String jsonRequest = createJsonMessage(map);
+                send(jsonRequest);
+            }
         }
     }
 
@@ -488,7 +510,7 @@ public class SmackCcsClient {
                 @Override
                 public void processPacket(Packet packet) {
                     logger.log(Level.INFO, "Received: " + packet.toXML());
-                    System.out.println("new message is coming");
+//                    System.out.println("new message is coming");
                     Message incomingMessage = (Message) packet;
                     GcmPacketExtension gcmPacket
                             = (GcmPacketExtension) incomingMessage.getExtension(GCM_NAMESPACE);
@@ -525,5 +547,5 @@ public class SmackCcsClient {
             throw new RuntimeException(e);
         }
     }
-    
+
 }

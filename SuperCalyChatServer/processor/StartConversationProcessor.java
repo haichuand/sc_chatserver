@@ -54,11 +54,9 @@ public class StartConversationProcessor implements PayloadProcessor{
             conversationId = msg.getPayload().get(CcsMessage.CONVERSATION_ID);
         
         if(msg.getPayload().containsKey(CcsMessage.RECIPIENTS)){
-            List<String> recipientsId = Arrays.asList(((String)msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
-            if(recipientsId != null) {
-                for(String id: recipientsId) {
-                    recipients.add(dao.getUserFcmId(id));
-                }
+            List<String> recipientsId = Arrays.asList((msg.getPayload().get(CcsMessage.RECIPIENTS)).split(","));
+            for(String id: recipientsId) {
+                recipients.add(dao.getUserFcmId(id));
             }
         }
         

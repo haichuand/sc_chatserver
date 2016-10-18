@@ -17,11 +17,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import SuperCalyChatServer.mail.HttpServerManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -41,13 +42,14 @@ public class SuperDao {
     
     private final static SuperDao instance = new SuperDao();
     private final static Random sRandom = new Random();
-    private final String host = "http://52.25.71.19:8080/SuperCaly/rest";
+    public final static String host = "http://52.25.71.19:8080/SuperCaly/rest";
     private final Set<Integer> mMessageIds = new HashSet<Integer>();
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();
     private final Map<String, String> mNotificationKeyMap = new HashMap<String, String>();
     private final ConcurrentHashMap<String, String> userFcmCache = new ConcurrentHashMap<>();
-    
+    private HttpServerManager httpServerManager = new HttpServerManager();
+
     private SuperDao() {        
     }
     
@@ -115,7 +117,16 @@ public class SuperDao {
     }
     
     public String getUserFcmId(String uId) {
-        return this.userFcmCache.get(uId);
+        String fcmId = userFcmCache.get(uId);
+//        System.out.println("fcmId=" + fcmId);
+        if (fcmId == null) {
+            //get user from http server
+            fcmId = httpServerManager.getUserFcmIdFromHttpServer(uId);
+            userFcmCache.put(uId, fcmId);
+//            System.out.println("Got fcmId for " + uId + ": " + fcmId);
+        }
+
+        return fcmId;
     }
     
     public void updateUserFcmId(String uId, String newFcmId) {
