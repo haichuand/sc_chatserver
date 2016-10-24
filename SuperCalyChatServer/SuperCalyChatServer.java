@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
+
+import SuperCalyChatServer.mail.MailResponseServer;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
 import org.json.simple.parser.ParseException;
@@ -38,6 +40,9 @@ public class SuperCalyChatServer {
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
         Thread t = new Thread(new httpserver());
         t.start();
+
+        Thread mailResponseServerThread = new Thread(new MailResponseServer());
+        mailResponseServerThread.start();
         
         try {
             ccsClient.getConnected();

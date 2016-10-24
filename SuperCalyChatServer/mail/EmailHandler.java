@@ -61,7 +61,7 @@ public class EmailHandler {
             Transport.send(message);
             System.out.println("Email sent successfully");
         }catch (MessagingException ex) {
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
         }
     }
 
