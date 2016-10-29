@@ -1,5 +1,8 @@
 package SuperCalyChatServer.mail;
 
+import SuperCalyChatServer.CcsMessage;
+import SuperCalyChatServer.DAO.SuperDao;
+import SuperCalyChatServer.SmackCcsClient;
 import org.apache.commons.io.IOUtils;
 
 import javax.mail.MessagingException;
@@ -10,16 +13,23 @@ import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Process email responses. Listens for response email messages on port 8020.
  * Response mail messages are forwarded by mailpipe.php in /etc/postfix folder
- * 
+ *
  * Created by haichuand on 10/22/2016.
  */
 public class MailResponseServer implements Runnable {
     private static final int PORT = 8020;
+    private static final long timeToLive = 10000L;
+    private static final boolean delayWhileIdle = false;
+
+    private HttpServerManager httpServerManager = new HttpServerManager();
+    private SmackCcsClient client = SmackCcsClient.getInstance();
+
     @Override
     public void run() {
         ServerSocket socket = null;
@@ -73,9 +83,45 @@ public class MailResponseServer implements Runnable {
                 System.out.println("MimeType=unknown");
             }
             String replyText = com.driftt.email.EmailMessage.read(body).getReply();
+            replyText = Pattern.compile("On .*,.* wrote:.*", Pattern.DOTALL).matcher(replyText).replaceAll("").trim();
             System.out.println("From=" + fromEmailAddress + "   toIdKey=" + toIdKey + "   toIdValue=" + toIdValue + "   replyText=" + replyText);
+
+            switch (toIdKey) {
+                case "conversationId":
+                    sendConversationMessage(toIdValue, fromEmailAddress, replyText);
+                    break;
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private void sendConversationMessage(String conversationId, String fromEmailAddress, String messageText) {
+//create new payload
+        Map<String, String> newPayload = new HashMap<>();
+        newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
+        newPayload.put(CcsMessage.ACTION, CcsMessage.ACTION_CONVERSATION_MESSAGE);
+        newPayload.put(CcsMessage.SENDER_ID, httpServerManager.getUserIdByEmail(fromEmailAddress));
+        newPayload.put(CcsMessage.MESSAGE, messageText);
+        newPayload.put(CcsMessage.MESSAGE_ID, "0");
+        newPayload.put(CcsMessage.ATTACHMENTS, null);
+        newPayload.put(CcsMessage.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+        List<String> recipientsFcmId = httpServerManager.getConversationAttendeesFcmId(conversationId);
+
+        //remove sender email from recipients
+        for (int i = 0; i < recipientsFcmId.size(); i++) {
+            String fcmId = recipientsFcmId.get(i);
+            if (fcmId.contains("@") && fromEmailAddress.equals(fcmId)) {
+                recipientsFcmId.remove(i);
+            }
+        }
+
+        client.sendBroadcast(
+                newPayload,
+                null,
+                timeToLive,
+                delayWhileIdle,
+                recipientsFcmId
+        );
     }
 }

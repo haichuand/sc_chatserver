@@ -28,6 +28,8 @@ public class CcsMessage {
     public static final String ATTACHMENTS = "attachments";
     public static final String TIMESTAMP = "timestamp";
 
+    public static final String ACTION_CONVERSATION_MESSAGE = "CONVERSATION_MESSAGE";
+
     /**
      * Recipient-ID.
      */

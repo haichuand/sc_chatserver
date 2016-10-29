@@ -1,7 +1,9 @@
 package SuperCalyChatServer.mail;
 
 import SuperCalyChatServer.CcsMessage;
+import SuperCalyChatServer.DAO.SuperDao;
 import SuperCalyChatServer.model.Conversation;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -25,6 +27,8 @@ public class HttpServerManager {
     public static final String GET_EVENT_URL = REST_URL + "event/getEvent/";
     public static final String GET_CONVERSATION_URL = REST_URL + "conversation/getConversation/";
     public static final String GET_USER_BY_ID_URL = REST_URL + "user/basicInfo/";
+    public static final String GET_USER_BY_EMAIL_URL = REST_URL + "user/getUserByEmail/";
+    public static final String GET_CONVERSATION_ATTENDEES_ID_URL = REST_URL + "conversation/conversationAttendeesId/";
 
     public static final String EMAIL = "email";
     public static final String FIRST_NAME = "firstName";
@@ -51,6 +55,8 @@ public class HttpServerManager {
     public static final String EMAIL_DOMAIN = "@supercaly.com";
 
     private static Map<String, String> userIdNameMap = new HashMap<>(); //map of userId -> name
+    private static Map<String, String> userEmailIdMap = new HashMap<>(); //map of email -> userId
+    private SuperDao dao = SuperDao.getInstance();
 
     public Conversation getEventConversation (String eventId) {
         Conversation conversation = new Conversation();
@@ -75,8 +81,8 @@ public class HttpServerManager {
                 idList.add(String.valueOf(idArray.getInt(i)));
             }
             conversation.attendeesId = idList;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
 
         return conversation;
@@ -88,8 +94,27 @@ public class HttpServerManager {
             if (conversationObj != null) {
                 return conversationObj.getString(TITLE);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    public String getUserIdByEmail (String email) {
+        if (userEmailIdMap.containsKey(email)) {
+            return userEmailIdMap.get(email);
+        }
+
+        try {
+            JSONObject userObject = queryServer(GET_USER_BY_EMAIL_URL + email, "GET", null);
+            if (userObject == null) {
+                return null;
+            }
+            String userId = String.valueOf(userObject.getInt(UID));
+            userEmailIdMap.put(email, userId);
+            return userId;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         return null;
     }
@@ -110,8 +135,8 @@ public class HttpServerManager {
             }
             userIdNameMap.put(userId, name);
             return name;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         return null;
     }
@@ -129,7 +154,7 @@ public class HttpServerManager {
 //                System.out.println(userObject.toString());
                 return userObject.getString(CcsMessage.FCM_ID);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         return null;
@@ -144,6 +169,22 @@ public class HttpServerManager {
             names += getUserName(id) + ", ";
         }
         return names.substring(0, names.lastIndexOf(','));
+    }
+
+    public List<String> getConversationAttendeesFcmId (String conversationId) {
+        List<String> attendeesFcmId = new ArrayList<>();
+        try {
+            JSONObject object = queryServer(GET_CONVERSATION_ATTENDEES_ID_URL + conversationId, "GET", null);
+            if (object != null) {
+                JSONArray idArray = object.getJSONArray(ATTENDEES_ID);
+                for (int i = 0; i < idArray.length(); i++) {
+                    attendeesFcmId.add(dao.getUserFcmId(idArray.get(i).toString()));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return attendeesFcmId;
     }
 
     private JSONObject queryServer(String urlString, String method, JSONObject data) throws IOException {
