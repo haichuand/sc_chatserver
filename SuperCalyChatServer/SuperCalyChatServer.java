@@ -33,8 +33,8 @@ public class SuperCalyChatServer {
 
 
     public static void main(String[] args) throws IOException {
-        final String projectId = "1076145801492";
-        final String password = "AIzaSyA_B4SmgfKpMbSp32jJbWrCqQ6YxGAhoMo";
+        final String projectId = "670096617047";
+        final String password = "AIzaSyDizGBQeIukKEftE3wgf4TWbi_UeCPeAdw";
 	
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
