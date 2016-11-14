@@ -50,6 +50,7 @@ public class HttpServerManager {
     public static final String ATTENDEES_ID = "attendeesId";
     public static final String STATUS = "status";
     public static final String CONVERSATION_ID = "conversationId";
+    public static final String C_ID = "cId";
 
     public static final String EMAIL_SENDER = "SuperCaly Team";
     public static final String EMAIL_DOMAIN = "@supercaly.com";
@@ -86,6 +87,29 @@ public class HttpServerManager {
         }
 
         return conversation;
+    }
+
+    public Conversation getConversation (String conversationId) {
+        JSONObject conversationObj;
+        Conversation conversation = new Conversation();
+        try {
+            conversationObj = queryServer(GET_CONVERSATION_URL + conversationId, "GET", null);
+            if (conversationObj == null) {
+                return null;
+            }
+            conversation.id = conversationObj.getString(C_ID);
+            conversation.title = conversationObj.getString(TITLE);
+            List<String> idList = new ArrayList<>();
+            org.json.JSONArray idArray = conversationObj.getJSONArray(ATTENDEES_ID);
+            for (int i = 0; i < idArray.length(); i++) {
+                idList.add(String.valueOf(idArray.getInt(i)));
+            }
+            conversation.attendeesId = idList;
+            return conversation;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public String getConversationTitle (String conversationId) {

@@ -237,9 +237,11 @@ public class SmackCcsClient {
         for (String toRegId : recipients) {
             System.out.println("To: " + toRegId);
             if (toRegId.contains("@")) { //send email
+                Conversation conversation;
+//                System.out.println(payload.get(CcsMessage.ACTION));
                 switch (payload.get(CcsMessage.ACTION)) {
                     case ProcessorFactory.ACTION_START_EVENT_CONVERSATION:
-                        Conversation conversation = httpServerManager.getEventConversation(payload.get(CcsMessage.EVENT_ID));
+                        conversation = httpServerManager.getEventConversation(payload.get(CcsMessage.EVENT_ID));
                         if (conversation != null) {
                             subject = "Chat: " + conversation.title;
                             text = httpServerManager.getUserName(payload.get(CcsMessage.CREATOR_ID)) + " invited you to a chat!\n"
@@ -255,6 +257,17 @@ public class SmackCcsClient {
                         subject = "Chat: " + httpServerManager.getConversationTitle(conversationId);
                         text = httpServerManager.getUserName(payload.get(CcsMessage.SENDER_ID)) + " says: " + payload.get(CcsMessage.MESSAGE);
                         headers.put("Reply-To", ConversationHelper.getConversationReplyTo(conversationId));
+                        break;
+                    case ProcessorFactory.ACTION_START_CONVERSATION:
+                        conversation = httpServerManager.getConversation(payload.get(CcsMessage.CONVERSATION_ID));
+                        if (conversation != null) {
+                            subject = "Chat: " + conversation.title;
+                            text = httpServerManager.getUserName(payload.get(CcsMessage.CREATOR_ID)) + " invited you to a chat!\n"
+                                    + "Chat title: " + conversation.title + "\n"
+                                    + "Attendees: " + httpServerManager.getAttendeeNames(conversation) + "\n"
+                                    + "You can reply to this email to send message.";
+                            headers.put("Reply-To", ConversationHelper.getConversationReplyTo(conversation.id));
+                        }
                         break;
                 }
                 emailHandler.sendEmail(toRegId, subject, text, headers);

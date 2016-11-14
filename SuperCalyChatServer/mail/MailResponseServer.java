@@ -83,6 +83,7 @@ public class MailResponseServer implements Runnable {
                 System.out.println("MimeType=unknown");
             }
             String replyText = com.driftt.email.EmailMessage.read(body).getReply();
+            // for Yahoo Mail
             replyText = Pattern.compile("On .*,.* wrote:.*", Pattern.DOTALL).matcher(replyText).replaceAll("").trim();
             System.out.println("From=" + fromEmailAddress + "   toIdKey=" + toIdKey + "   toIdValue=" + toIdValue + "   replyText=" + replyText);
 
