@@ -39,11 +39,8 @@ public class MailResponseServer implements Runnable {
             while (true) {
                 System.out.println("MailResponseServer loop starts...");
                 Socket client = socket.accept();
-//                System.out.println("MailResponseServer socket accepted...");
                 InputStream in = client.getInputStream();
-//                System.out.println("MailResponseServer InputStream obtained...");
                 String inputString = IOUtils.toString(in, "UTF-8");
-//                System.out.println(inputString);
                 processEmailResponse(inputString);
                 in.close();
                 client.close();
@@ -98,7 +95,7 @@ public class MailResponseServer implements Runnable {
     }
 
     private void sendConversationMessage(String conversationId, String fromEmailAddress, String messageText) {
-//create new payload
+        //create new payload
         Map<String, String> newPayload = new HashMap<>();
         newPayload.put(CcsMessage.CONVERSATION_ID, conversationId);
         newPayload.put(CcsMessage.ACTION, CcsMessage.ACTION_CONVERSATION_MESSAGE);

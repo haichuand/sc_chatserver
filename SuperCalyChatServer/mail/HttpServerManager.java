@@ -23,7 +23,7 @@ import java.util.Map;
  * Created by haichuand on 10/15/2016.
  */
 public class HttpServerManager {
-    public static final String REST_URL = "http://52.25.71.19:8080/SuperCaly/rest/";
+    public static final String REST_URL = "https://www.supercaly.com:8443/SuperCaly/rest/";
     public static final String GET_EVENT_URL = REST_URL + "event/getEvent/";
     public static final String GET_CONVERSATION_URL = REST_URL + "conversation/getConversation/";
     public static final String GET_USER_BY_ID_URL = REST_URL + "user/basicInfo/";

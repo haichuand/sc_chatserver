@@ -30,12 +30,13 @@ import java.util.logging.Logger;
  * @author xuejing
  */
 public class SuperCalyChatServer {
-
+    private static long lastFcmCacheRefreshTime = 0L;
+    private static final long FcmCacheRefreshInterval = 7200000;
 
     public static void main(String[] args) throws IOException {
         final String projectId = "670096617047";
         final String password = "AIzaSyDizGBQeIukKEftE3wgf4TWbi_UeCPeAdw";
-	
+
         //connect();
         SmackCcsClient ccsClient = SmackCcsClient.prepareClient(projectId, password, true);
         Thread t = new Thread(new httpserver());
@@ -43,10 +44,10 @@ public class SuperCalyChatServer {
 
         Thread mailResponseServerThread = new Thread(new MailResponseServer());
         mailResponseServerThread.start();
-        
+
         try {
             ccsClient.getConnected();
-        } 
+        }
         catch (SmackException.ConnectionException e) {
             logger.log(Level.SEVERE,e.getFailedAddresses().toString());
             logger.log(Level.SEVERE,e.getFailedAddresses().get(0).getException().getMessage());
@@ -60,28 +61,35 @@ public class SuperCalyChatServer {
         catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         try {
-            
+
             SuperDao.getInstance().populateUserFcmCache();
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-       
-            while(true){
+
+        while(true){
             try {
                 Thread.sleep(50);
+                long time = System.currentTimeMillis();
+                if (time - lastFcmCacheRefreshTime > FcmCacheRefreshInterval) {
+                    SuperDao.getInstance().populateUserFcmCache();
+                    lastFcmCacheRefreshTime = time;
+                }
             } catch (InterruptedException ex) {
                 Logger.getLogger(SuperCalyChatServer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParseException ex) {
+                ex.printStackTrace();
             }
-               
-            }
- 
-        
-        
-    }  
-    
+
+        }
+
+
+
+    }
+
 }

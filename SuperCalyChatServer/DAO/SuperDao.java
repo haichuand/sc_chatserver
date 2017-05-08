@@ -42,7 +42,6 @@ public class SuperDao {
     
     private final static SuperDao instance = new SuperDao();
     private final static Random sRandom = new Random();
-    public final static String host = "http://52.25.71.19:8080/SuperCaly/rest";
     private final Set<Integer> mMessageIds = new HashSet<Integer>();
     private final Map<String, List<String>> mUserMap = new HashMap<String, List<String>>();
     private final List<String> mRegisteredUsers = new ArrayList<String>();
@@ -136,7 +135,7 @@ public class SuperDao {
     }
     
     public void populateUserFcmCache() throws IOException, ParseException{
-        String url = host + "/user/getAllUserIdAndFcmId";
+        String url = HttpServerManager.REST_URL + "user/getAllUserIdAndFcmId";
         String fcmIdJson;
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -161,6 +160,7 @@ public class SuperDao {
         
         fcmIdJson = response.toString();
         logger.log(Level.INFO, "Populate the fcmId cache: "+ fcmIdJson);
+        userFcmCache.clear();
         fcmIdsJsonParser(fcmIdJson, this.userFcmCache);
     }
     
